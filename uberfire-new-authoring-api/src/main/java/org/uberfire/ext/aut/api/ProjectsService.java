@@ -18,9 +18,12 @@ package org.uberfire.ext.aut.api;
 
 import org.jboss.errai.bus.server.annotations.Remote;
 
+import java.util.List;
+
 @Remote
-public interface SampleServiceAPI {
+public interface ProjectsService {
 
-    String hello();
+    List<String> getOrganizationUnits();
 
+    List<Project> getProjects(String organizationUnitName);
 }

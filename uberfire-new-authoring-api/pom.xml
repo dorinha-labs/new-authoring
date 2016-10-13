@@ -39,5 +39,6 @@
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-common</artifactId>
     </dependency>
+
   </dependencies>
 </project>
