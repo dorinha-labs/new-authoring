@@ -16,7 +16,12 @@ public class Project {
     }
 
 
+    public String getCreationDate(){
+        return "01/01/2001";
+    }
     public Project( String nome ) {
         this.nome = nome;
     }
+
+
 }

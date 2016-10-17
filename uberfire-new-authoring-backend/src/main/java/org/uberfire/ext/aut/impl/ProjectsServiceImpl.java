@@ -35,10 +35,10 @@ public class ProjectsServiceImpl implements ProjectsService {
 
     @Override
     public List<Project> getProjects( String organizationUnitName ) {
-        return Arrays.asList( new Project( "project 1" ),
-                              new Project( "project 2" ),
-                              new Project( "project 3" ),
-                              new Project( "project 4" ),
-                              new Project( "project 5" ) );
+        return Arrays.asList( new Project( "project 1 " + organizationUnitName ),
+                              new Project( "project 2 " + organizationUnitName ),
+                              new Project( "project 3 " + organizationUnitName ),
+                              new Project( "project 4 " + organizationUnitName ),
+                              new Project( "project 5 " + organizationUnitName ) );
     }
 }

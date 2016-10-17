@@ -21,7 +21,7 @@ public class ProjectItemWidget implements IsElement {
 
     @Inject
     @DataField
-    Div projectListItemHeading;
+    Div projectListItem;
 
     @Inject
     @DataField
@@ -36,7 +36,7 @@ public class ProjectItemWidget implements IsElement {
             e.stopImmediatePropagation();
             select.execute();
         } );
-        projectListItemHeading.setOnclick( e -> details.execute() );
+        projectListItem.setOnclick( e -> details.execute() );
         kebabWidget.init( details, select );
         projectListItemKebab.appendChild( kebabWidget.getElement() );
     }

@@ -17,10 +17,13 @@ package org.uberfire.ext.aut.client.perspective;/*
 
 import com.google.gwt.user.client.ui.Composite;
 import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.uberfire.client.annotations.Perspective;
 import org.uberfire.client.annotations.WorkbenchPerspective;
 import org.uberfire.client.mvp.PlaceManager;
+import org.uberfire.client.workbench.docks.UberfireDocks;
+import org.uberfire.ext.aut.client.util.ProjectsDocks;
 import org.uberfire.lifecycle.OnOpen;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.PlaceRequest;
@@ -44,6 +47,17 @@ public class ProjectsPerspective extends Composite {
 
     @Inject
     PlaceManager placeManager;
+
+    @Inject
+    private UberfireDocks uberfireDocks;
+
+    @Inject
+    private ProjectsDocks projectsDocks;
+
+    @AfterInitialization
+    public void setupDocks() {
+        projectsDocks.start();
+    }
 
     @PostConstruct
     public void setup() {

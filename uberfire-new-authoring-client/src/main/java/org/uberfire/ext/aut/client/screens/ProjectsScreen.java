@@ -16,16 +16,18 @@
 
 package org.uberfire.ext.aut.client.screens;
 
-import com.google.gwt.core.client.GWT;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
 import org.uberfire.client.mvp.UberElement;
+import org.uberfire.client.workbench.docks.UberfireDock;
+import org.uberfire.client.workbench.docks.UberfireDocks;
 import org.uberfire.ext.aut.api.Project;
 import org.uberfire.ext.aut.api.ProjectsService;
 import org.uberfire.ext.aut.client.events.OrganizationUnitChangeEvent;
+import org.uberfire.ext.aut.client.util.ProjectsDocks;
 import org.uberfire.lifecycle.OnOpen;
 import org.uberfire.mvp.Command;
 
@@ -56,11 +58,18 @@ public class ProjectsScreen {
     @Inject
     private Event<OrganizationUnitChangeEvent> organizationUnitChangeEvent;
 
+    @Inject
+    private UberfireDocks uberfireDocks;
+
+    @Inject
+    private ProjectsDocks projectsDocks;
+
     @OnOpen
     public void onOpen() {
         loadOrganizationUnits();
-        //TODO
-        loadProjects( "default-ou or saved in preferences" );
+        //TODO default-ou or saved in preferences
+        loadProjects( "ou1" );
+        projectsDocks.refresh();
 
     }
 
@@ -92,11 +101,16 @@ public class ProjectsScreen {
     }
 
     private Command selectCommand( String nome ) {
-        return () -> GWT.log( "select command " + nome );
+        return () -> {
+//            GWT.log( "select" );
+        };
     }
 
-    private Command detailsCommand( String nome ) {
-        return () -> GWT.log( "details command " + nome );
+    private Command detailsCommand( String selectedProject ) {
+        String currentProject = null;
+        return () -> {
+            projectsDocks.handle(selectedProject);
+        };
     }
 
     public void selectOrganizationUnit( String ou ) {
