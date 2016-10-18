@@ -1,5 +1,6 @@
 package org.uberfire.ext.aut.client.screens;
 
+import com.google.gwt.user.client.Event;
 import com.google.inject.Inject;
 import org.jboss.errai.common.client.dom.*;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
@@ -28,6 +29,10 @@ public class LibraryView implements LibraryScreen.View, IsElement {
     @Inject
     Button newProjectButton;
 
+    @DataField
+    @Inject
+    Input filterText;
+
     @Inject
     Document document;
 
@@ -46,9 +51,9 @@ public class LibraryView implements LibraryScreen.View, IsElement {
     }
 
     @Override
-    public void addProject( String project, Command details, Command select ) {
+    public void addProject( String project, String projectCreated, Command details, Command select ) {
         ProjectItemWidget projectItemWidget = itemWidgetsInstances.get();
-        projectItemWidget.init( project, details, select );
+        projectItemWidget.init( project, projectCreated, details, select );
         projectList.appendChild( projectItemWidget.getElement() );
     }
 
@@ -62,12 +67,25 @@ public class LibraryView implements LibraryScreen.View, IsElement {
         DOMUtil.removeAllChildren( teamDropdown );
     }
 
+    @Override
+    public void clearFilterText() {
+        this.filterText.setValue( "" );
+    }
+
 
     @SinkNative( com.google.gwt.user.client.Event.ONCLICK )
     @EventHandler( "newProjectButton" )
     public void newProject( com.google.gwt.user.client.Event e ) {
+
         presenter.newProject();
     }
+
+    @SinkNative( Event.ONKEYUP )
+    @EventHandler( "filterText" )
+    public void filterTextChange( com.google.gwt.user.client.Event e ) {
+        presenter.filterProjects( filterText.getValue() );
+    }
+
 
     private Option createOption( String ou ) {
         Option option = ( Option ) document.createElement( "option" );

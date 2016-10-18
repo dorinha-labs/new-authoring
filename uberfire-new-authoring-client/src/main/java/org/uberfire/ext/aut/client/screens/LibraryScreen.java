@@ -40,18 +40,23 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @WorkbenchScreen( identifier = "LibraryScreen" )
 public class LibraryScreen {
 
+
     public interface View extends UberElement<LibraryScreen> {
+
         void clearProjects();
 
         void addOrganizationUnit( String ou );
 
-        void addProject( String project, Command details, Command select );
+        void addProject( String project, String projectCreated, Command details, Command select );
 
         void clearOrganizationUnits();
+
+        void clearFilterText();
     }
 
     @Inject
@@ -72,6 +77,8 @@ public class LibraryScreen {
     @Inject
     private PlaceManager placeManager;
 
+    private LibraryInfo libraryInfo;
+
     @OnOpen
     public void onOpen() {
 
@@ -79,6 +86,7 @@ public class LibraryScreen {
         projectsService.call( new RemoteCallback<LibraryInfo>() {
             @Override
             public void callback( LibraryInfo libraryInfo ) {
+                LibraryScreen.this.libraryInfo = libraryInfo;
                 if ( libraryInfo.fullLibrary() ) {
                     loadLibrary( libraryInfo );
                 } else if ( !libraryInfo.hasDefaultOu() ) {
@@ -113,6 +121,7 @@ public class LibraryScreen {
     }
 
     private void reloadProjects( String organizationUnit ) {
+        view.clearFilterText();
         projectsService.call( new RemoteCallback<List<Project>>() {
             @Override
             public void callback( List<Project> projects ) {
@@ -124,7 +133,7 @@ public class LibraryScreen {
     private void setupProjects( List<Project> projects ) {
         view.clearProjects();
         projects.stream().forEach( p -> view
-                .addProject( p.getNome(), detailsCommand( p.getNome() ), selectCommand( p.getNome() ) ) );
+                .addProject( p.getNome(), p.getCreationDate(), detailsCommand( p.getNome() ), selectCommand( p.getNome() ) ) );
     }
 
     private Command selectCommand( String nome ) {
@@ -154,5 +163,15 @@ public class LibraryScreen {
     @WorkbenchPartView
     public UberElement<LibraryScreen> getView() {
         return view;
+    }
+
+    public void filterProjects( String filter ) {
+        if ( libraryInfo.fullLibrary() ) {
+            List<Project> filteredProjects = libraryInfo.getProjects().stream()
+                    .filter( p -> p.getNome().toUpperCase()
+                            .startsWith( filter.toUpperCase() ) )
+                    .collect( Collectors.toList() );
+            setupProjects( filteredProjects );
+        }
     }
 }

@@ -28,11 +28,18 @@ public class ProjectItemWidget implements IsElement {
     Div projectListItemKebab;
 
     @Inject
+    @DataField
+    Div projectListItemText;
+
+
+    @Inject
     KebabWidget kebabWidget;
 
-    public void init( String project, Command details, Command select ) {
-        projectName.setTextContent( project );
-        projectName.setOnclick( e -> {
+    public void init( String projectName, String projectCreated, Command details, Command select ) {
+        this.projectName.setTextContent( projectName );
+        //TODO i18n
+        projectListItemText.setTextContent( "Created on " + projectCreated );
+        this.projectName.setOnclick( e -> {
             e.stopImmediatePropagation();
             select.execute();
         } );

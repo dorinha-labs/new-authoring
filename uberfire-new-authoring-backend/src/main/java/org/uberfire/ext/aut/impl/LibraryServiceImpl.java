@@ -57,7 +57,7 @@ public class LibraryServiceImpl implements LibraryService {
 
     @Override
     public List<Project> getProjects( String organizationUnitName ) {
-        return Arrays.asList( new Project( "cproject 1 " + organizationUnitName ),
+        return Arrays.asList( new Project( "acproject 1 " + organizationUnitName ),
                               new Project( "bproject 2 " + organizationUnitName ),
                               new Project( "aroject 3 " + organizationUnitName ),
                               new Project( "eroject 4 " + organizationUnitName ),
