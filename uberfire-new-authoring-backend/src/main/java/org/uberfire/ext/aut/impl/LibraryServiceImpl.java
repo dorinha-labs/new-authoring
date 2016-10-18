@@ -17,20 +17,42 @@
 package org.uberfire.ext.aut.impl;
 
 import org.jboss.errai.bus.server.annotations.Service;
+import org.uberfire.ext.aut.api.LibraryInfo;
+import org.uberfire.ext.aut.api.LibraryService;
+import org.uberfire.ext.aut.api.OrganizationUnit;
 import org.uberfire.ext.aut.api.Project;
-import org.uberfire.ext.aut.api.ProjectsService;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import java.util.Arrays;
 import java.util.List;
 
 @Service
 @ApplicationScoped
-public class ProjectsServiceImpl implements ProjectsService {
+public class LibraryServiceImpl implements LibraryService {
+
+
+    @PostConstruct
+    public void setup() {
+        //setupPreferences, default ou, etc.
+
+    }
 
     @Override
-    public List<String> getOrganizationUnits() {
-        return Arrays.asList( "ou1", "ou2" );
+    public LibraryInfo getProjectsInfo() {
+        //delete this, just to show loading
+        try {
+            Thread.sleep( 1000 );
+        } catch ( InterruptedException e ) {
+            e.printStackTrace();
+        }
+
+        //TODO take real data
+        LibraryInfo libraryInfo = new LibraryInfo(
+                new OrganizationUnit( "defaultOU" ),
+                getProjects( "defaultOU" ),
+                getOrganizationUnits() );
+        return libraryInfo;
     }
 
     @Override
@@ -40,5 +62,10 @@ public class ProjectsServiceImpl implements ProjectsService {
                               new Project( "project 3 " + organizationUnitName ),
                               new Project( "project 4 " + organizationUnitName ),
                               new Project( "project 5 " + organizationUnitName ) );
+    }
+
+    public List<OrganizationUnit> getOrganizationUnits() {
+        return Arrays.asList( new OrganizationUnit( "defaultOU" ),
+                              new OrganizationUnit( "ou2" ) );
     }
 }

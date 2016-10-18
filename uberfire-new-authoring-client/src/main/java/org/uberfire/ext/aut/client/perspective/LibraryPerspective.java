@@ -37,13 +37,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 @ApplicationScoped
-@WorkbenchPerspective( identifier = "ProjectsPerspective", isDefault = true )
-public class ProjectsPerspective extends Composite {
+@WorkbenchPerspective( identifier = "LibraryPerspective", isDefault = true )
+public class LibraryPerspective extends Composite {
 
-
-    @Inject
-    @DataField
-    Div library;
 
     @Inject
     PlaceManager placeManager;
@@ -77,10 +73,10 @@ public class ProjectsPerspective extends Composite {
     public PerspectiveDefinition buildPerspective() {
         final PerspectiveDefinition p = new PerspectiveDefinitionImpl(
                 "org.uberfire.client.workbench.panels.impl.StaticWorkbenchPanelPresenter" );
-        p.setName( "Projects Perspective" );
+        p.setName( "Library Perspective" );
         p.getRoot().addPart(
                 new PartDefinitionImpl(
-                        new DefaultPlaceRequest( "ProjectsScreen" ) ) );
+                        new DefaultPlaceRequest( "LibraryScreen" ) ) );
 
         return p;
     }

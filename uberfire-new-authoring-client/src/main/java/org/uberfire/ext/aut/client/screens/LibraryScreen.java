@@ -16,16 +16,17 @@
 
 package org.uberfire.ext.aut.client.screens;
 
+import com.google.gwt.core.client.GWT;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
 import org.uberfire.client.mvp.UberElement;
-import org.uberfire.client.workbench.docks.UberfireDock;
 import org.uberfire.client.workbench.docks.UberfireDocks;
+import org.uberfire.ext.aut.api.LibraryInfo;
+import org.uberfire.ext.aut.api.LibraryService;
 import org.uberfire.ext.aut.api.Project;
-import org.uberfire.ext.aut.api.ProjectsService;
 import org.uberfire.ext.aut.client.events.OrganizationUnitChangeEvent;
 import org.uberfire.ext.aut.client.util.ProjectsDocks;
 import org.uberfire.lifecycle.OnOpen;
@@ -36,10 +37,10 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.List;
 
-@WorkbenchScreen( identifier = "ProjectsScreen" )
-public class ProjectsScreen {
+@WorkbenchScreen( identifier = "LibraryScreen" )
+public class LibraryScreen {
 
-    public interface View extends UberElement<ProjectsScreen> {
+    public interface View extends UberElement<LibraryScreen> {
         void clearProjects();
 
         void addOrganizationUnit( String ou );
@@ -53,7 +54,7 @@ public class ProjectsScreen {
     private View view;
 
     @Inject
-    private Caller<ProjectsService> projectsService;
+    private Caller<LibraryService> projectsService;
 
     @Inject
     private Event<OrganizationUnitChangeEvent> organizationUnitChangeEvent;
@@ -66,50 +67,65 @@ public class ProjectsScreen {
 
     @OnOpen
     public void onOpen() {
-        loadOrganizationUnits();
-        //TODO default-ou or saved in preferences
-        loadProjects( "ou1" );
-        projectsDocks.refresh();
 
-    }
 
-    private void loadOrganizationUnits() {
-        //TODO ederign Error callback
-        projectsService.call( new RemoteCallback<List<String>>() {
+        projectsService.call( new RemoteCallback<LibraryInfo>() {
             @Override
-            public void callback( List<String> ous ) {
-                view.clearOrganizationUnits();
-                ous.forEach( ou -> view.addOrganizationUnit( ou ) );
+            public void callback( LibraryInfo libraryInfo ) {
+                if ( libraryInfo.fullLibrary() ) {
+                    loadLibrary( libraryInfo );
+                } else if ( !libraryInfo.hasDefaultOu() ) {
+                    GWT.log( "GOTO ADM SCREEN WITH A POPUP TELLING THAT NEEDS A OU" );
+                } else {
+                    GWT.log( "GOTO NEW PROJECT SCREEN" );
+                }
             }
-        } ).getOrganizationUnits();
+        } ).getProjectsInfo();
     }
 
+    private void loadLibrary( LibraryInfo libraryInfo ) {
+        setupProjects( libraryInfo.getProjects() );
+        setupOus( libraryInfo );
+        projectsDocks.refresh();
+    }
+
+    private void setupOus( LibraryInfo libraryInfo ) {
+        view.clearOrganizationUnits();
+        //TODO setup default ou
+        libraryInfo.getOrganizationUnits().forEach( ou -> view.addOrganizationUnit( ou.getNome() ) );
+    }
 
     public void organizationUnitChange( @Observes OrganizationUnitChangeEvent event ) {
-        loadProjects( event.getOrganizationUnit() );
+        reloadProjects( event.getOrganizationUnit() );
     }
 
-    private void loadProjects( String organizationUnit ) {
+    private void reloadProjects( String organizationUnit ) {
         projectsService.call( new RemoteCallback<List<Project>>() {
             @Override
             public void callback( List<Project> projects ) {
-                view.clearProjects();
-                projects.stream().forEach( p -> view
-                        .addProject( p.getNome(), detailsCommand( p.getNome() ), selectCommand( p.getNome() ) ) );
+                setupProjects( projects );
             }
         } ).getProjects( organizationUnit );
     }
 
+    private void setupProjects( List<Project> projects ) {
+        view.clearProjects();
+        projects.stream().forEach( p -> view
+                .addProject( p.getNome(), detailsCommand( p.getNome() ), selectCommand( p.getNome() ) ) );
+    }
+
     private Command selectCommand( String nome ) {
         return () -> {
-//            GWT.log( "select" );
+            GWT.log( "select" );
         };
     }
 
     private Command detailsCommand( String selectedProject ) {
         String currentProject = null;
         return () -> {
-            projectsDocks.handle(selectedProject);
+            //TODO Open Details Screen
+            GWT.log( "details" );
+//            projectsDocks.handle(selectedProject);
         };
     }
 
@@ -119,11 +135,11 @@ public class ProjectsScreen {
 
     @WorkbenchPartTitle
     public String getTitle() {
-        return "ProjectsScreen";
+        return "LibraryScreen";
     }
 
     @WorkbenchPartView
-    public UberElement<ProjectsScreen> getView() {
+    public UberElement<LibraryScreen> getView() {
         return view;
     }
 }

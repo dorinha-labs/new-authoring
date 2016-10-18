@@ -10,9 +10,9 @@ import org.uberfire.ext.aut.client.widgets.ProjectItemWidget;
 import org.uberfire.mvp.Command;
 
 @Templated
-public class ProjectsView implements ProjectsScreen.View, IsElement {
+public class LibraryView implements LibraryScreen.View, IsElement {
 
-    private ProjectsScreen presenter;
+    private LibraryScreen presenter;
 
     @DataField
     @Inject
@@ -29,7 +29,7 @@ public class ProjectsView implements ProjectsScreen.View, IsElement {
     ManagedInstance<ProjectItemWidget> itemWidgetsInstances;
 
     @Override
-    public void init( ProjectsScreen presenter ) {
+    public void init( LibraryScreen presenter ) {
         this.presenter = presenter;
         teamDropdown.setOnchange( event -> presenter.selectOrganizationUnit( teamDropdown.getValue() ) );
     }

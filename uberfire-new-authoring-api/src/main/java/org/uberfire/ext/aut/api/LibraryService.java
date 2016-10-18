@@ -21,9 +21,9 @@ import org.jboss.errai.bus.server.annotations.Remote;
 import java.util.List;
 
 @Remote
-public interface ProjectsService {
+public interface LibraryService {
 
-    List<String> getOrganizationUnits();
+    LibraryInfo getProjectsInfo();
 
     List<Project> getProjects(String organizationUnitName);
 }
