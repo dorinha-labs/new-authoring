@@ -22,6 +22,7 @@ import org.jboss.errai.common.client.api.RemoteCallback;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
+import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.client.workbench.docks.UberfireDocks;
 import org.uberfire.ext.aut.api.LibraryInfo;
@@ -31,11 +32,14 @@ import org.uberfire.ext.aut.client.events.OrganizationUnitChangeEvent;
 import org.uberfire.ext.aut.client.util.ProjectsDocks;
 import org.uberfire.lifecycle.OnOpen;
 import org.uberfire.mvp.Command;
+import org.uberfire.mvp.impl.DefaultPlaceRequest;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WorkbenchScreen( identifier = "LibraryScreen" )
 public class LibraryScreen {
@@ -65,10 +69,13 @@ public class LibraryScreen {
     @Inject
     private ProjectsDocks projectsDocks;
 
+    @Inject
+    private PlaceManager placeManager;
+
     @OnOpen
     public void onOpen() {
 
-
+        //TODO put loading here
         projectsService.call( new RemoteCallback<LibraryInfo>() {
             @Override
             public void callback( LibraryInfo libraryInfo ) {
@@ -81,6 +88,12 @@ public class LibraryScreen {
                 }
             }
         } ).getProjectsInfo();
+    }
+
+    public void newProject() {
+        Map<String, String> param = new HashMap<>();
+        param.put( "backPlace", "LibraryScreen" );
+        placeManager.goTo( new DefaultPlaceRequest( "NewProjectScreen", param ) );
     }
 
     private void loadLibrary( LibraryInfo libraryInfo ) {

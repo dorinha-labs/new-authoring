@@ -5,6 +5,8 @@ import org.jboss.errai.common.client.dom.*;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
+import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.uberfire.ext.aut.client.widgets.ProjectItemWidget;
 import org.uberfire.mvp.Command;
@@ -21,6 +23,10 @@ public class LibraryView implements LibraryScreen.View, IsElement {
     @DataField
     @Inject
     Div projectList;
+
+    @DataField
+    @Inject
+    Button newProjectButton;
 
     @Inject
     Document document;
@@ -54,6 +60,13 @@ public class LibraryView implements LibraryScreen.View, IsElement {
     @Override
     public void clearOrganizationUnits() {
         DOMUtil.removeAllChildren( teamDropdown );
+    }
+
+
+    @SinkNative( com.google.gwt.user.client.Event.ONCLICK )
+    @EventHandler( "newProjectButton" )
+    public void newProject( com.google.gwt.user.client.Event e ) {
+        presenter.newProject();
     }
 
     private Option createOption( String ou ) {
