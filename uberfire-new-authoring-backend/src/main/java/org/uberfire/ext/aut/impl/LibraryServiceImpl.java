@@ -16,56 +16,94 @@
 
 package org.uberfire.ext.aut.impl;
 
+import org.guvnor.common.services.project.model.Project;
+import org.guvnor.structure.organizationalunit.OrganizationalUnit;
+import org.guvnor.structure.organizationalunit.OrganizationalUnitService;
+import org.guvnor.structure.repositories.Repository;
+import org.guvnor.structure.repositories.RepositoryService;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.uberfire.ext.aut.api.LibraryInfo;
 import org.uberfire.ext.aut.api.LibraryService;
-import org.uberfire.ext.aut.api.OrganizationUnit;
-import org.uberfire.ext.aut.api.Project;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import java.util.Arrays;
-import java.util.List;
+import javax.inject.Inject;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @ApplicationScoped
 public class LibraryServiceImpl implements LibraryService {
 
 
-    @PostConstruct
-    public void setup() {
-        //setupPreferences, default ou, etc.
+    @Inject
+    private OrganizationalUnitService service;
 
-    }
+    @Inject
+    private RepositoryService repositoryService;
+
+    @Inject
+    private KieProjectService kieProjectService;
+
 
     @Override
-    public LibraryInfo getProjectsInfo() {
-        //delete this, just to show loading
-        try {
-            Thread.sleep( 1000 );
-        } catch ( InterruptedException e ) {
-            e.printStackTrace();
-        }
+    public LibraryInfo getDefaultLibraryInfo() {
 
-        //TODO take real data
+        Collection<OrganizationalUnit> organizationalUnits = service.getOrganizationalUnits();
+        OrganizationalUnit defaultOU = getDefaultOU( organizationalUnits );
+
         LibraryInfo libraryInfo = new LibraryInfo(
-                new OrganizationUnit( "defaultOU" ),
-                getProjects( "defaultOU" ),
-                getOrganizationUnits() );
+                defaultOU,
+                getProjects( defaultOU ),
+                organizationalUnits );
+
         return libraryInfo;
     }
 
     @Override
-    public List<Project> getProjects( String organizationUnitName ) {
-        return Arrays.asList( new Project( "acproject 1 " + organizationUnitName ),
-                              new Project( "bproject 2 " + organizationUnitName ),
-                              new Project( "aroject 3 " + organizationUnitName ),
-                              new Project( "eroject 4 " + organizationUnitName ),
-                              new Project( "droject 5 " + organizationUnitName ) );
+    public LibraryInfo getLibraryInfo( String selectedOuIdentifier ) {
+        Collection<OrganizationalUnit> organizationalUnits = service.getOrganizationalUnits();
+        OrganizationalUnit defaultOU = getDefaultOU( organizationalUnits );
+        OrganizationalUnit selectedOU = getOU( selectedOuIdentifier, organizationalUnits );
+
+
+        LibraryInfo libraryInfo = new LibraryInfo(
+                defaultOU,
+                getProjects( selectedOU ),
+                organizationalUnits );
+
+        return libraryInfo;
+
     }
 
-    public List<OrganizationUnit> getOrganizationUnits() {
-        return Arrays.asList( new OrganizationUnit( "defaultOU" ),
-                              new OrganizationUnit( "ou2" ) );
+    private OrganizationalUnit getOU( String ouIdentifier, Collection<OrganizationalUnit> organizationalUnits ) {
+        //READ FROM PREFERENCES
+        Optional<OrganizationalUnit> defaultOU = organizationalUnits.stream()
+                .filter( p -> p.getIdentifier().equalsIgnoreCase( ouIdentifier ) ).findFirst();
+        if ( defaultOU.isPresent() ) {
+            return defaultOU.get();
+        }
+        return null;
     }
+
+    private OrganizationalUnit getDefaultOU( Collection<OrganizationalUnit> organizationalUnits ) {
+        //READ FROM PREFERENCES
+        Optional<OrganizationalUnit> defaultOU = organizationalUnits.stream().findFirst();
+        if ( defaultOU.isPresent() ) {
+            return defaultOU.get();
+        }
+        return null;
+    }
+
+    private Set<Project> getProjects( OrganizationalUnit ou ) {
+        if ( ou != null && ou.getRepositories() != null ) {
+            Repository repository = ou.getRepositories().stream().findFirst().get();
+            return kieProjectService.getProjects( repository, "master" );
+        } else {
+            return Collections.emptySet();
+        }
+    }
+
 }

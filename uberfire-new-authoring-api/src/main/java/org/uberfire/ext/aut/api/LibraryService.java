@@ -18,12 +18,11 @@ package org.uberfire.ext.aut.api;
 
 import org.jboss.errai.bus.server.annotations.Remote;
 
-import java.util.List;
-
 @Remote
 public interface LibraryService {
 
-    LibraryInfo getProjectsInfo();
+    LibraryInfo getDefaultLibraryInfo();
 
-    List<Project> getProjects(String organizationUnitName);
+    LibraryInfo getLibraryInfo( String selectedOuIdentifier );
+
 }

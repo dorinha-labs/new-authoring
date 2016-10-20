@@ -30,7 +30,7 @@ public class ProjectsDocks {
     public void setup() {
         uberfireDock = new UberfireDock( UberfireDockPosition.EAST, "INFO_CIRCLE",
                                          new DefaultPlaceRequest( "ProjectsDetailScreen" ),
-                                         "ProjectsPerspective" ).withSize( 450 ).withLabel( "View Project" );
+                                         "LibraryPerspective" ).withSize( 450 ).withLabel( "View Project" );
     }
 
     public UberfireDock getUberfireDock() {

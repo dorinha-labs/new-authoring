@@ -17,8 +17,10 @@
 package org.uberfire.ext.aut.client.screens;
 
 import com.google.gwt.core.client.GWT;
+import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.kie.uberfire.social.activities.model.SocialFileSelectedEvent;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
@@ -27,24 +29,23 @@ import org.uberfire.client.mvp.UberElement;
 import org.uberfire.client.workbench.docks.UberfireDocks;
 import org.uberfire.ext.aut.api.LibraryInfo;
 import org.uberfire.ext.aut.api.LibraryService;
-import org.uberfire.ext.aut.api.Project;
-import org.uberfire.ext.aut.client.events.OrganizationUnitChangeEvent;
 import org.uberfire.ext.aut.client.util.ProjectsDocks;
 import org.uberfire.lifecycle.OnOpen;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.impl.DefaultPlaceRequest;
 
 import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @WorkbenchScreen( identifier = "LibraryScreen" )
 public class LibraryScreen {
 
+
+    private LibraryInfo libraryInfo;
 
     public interface View extends UberElement<LibraryScreen> {
 
@@ -66,9 +67,6 @@ public class LibraryScreen {
     private Caller<LibraryService> projectsService;
 
     @Inject
-    private Event<OrganizationUnitChangeEvent> organizationUnitChangeEvent;
-
-    @Inject
     private UberfireDocks uberfireDocks;
 
     @Inject
@@ -77,16 +75,16 @@ public class LibraryScreen {
     @Inject
     private PlaceManager placeManager;
 
-    private LibraryInfo libraryInfo;
-
     @OnOpen
     public void onOpen() {
 
-        //TODO put loading here
+        loadDefaultLibrary();
+    }
+
+    private void loadDefaultLibrary() {
         projectsService.call( new RemoteCallback<LibraryInfo>() {
             @Override
             public void callback( LibraryInfo libraryInfo ) {
-                LibraryScreen.this.libraryInfo = libraryInfo;
                 if ( libraryInfo.fullLibrary() ) {
                     loadLibrary( libraryInfo );
                 } else if ( !libraryInfo.hasDefaultOu() ) {
@@ -95,7 +93,38 @@ public class LibraryScreen {
                     GWT.log( "GOTO NEW PROJECT SCREEN" );
                 }
             }
-        } ).getProjectsInfo();
+        } ).getDefaultLibraryInfo();
+    }
+
+    private void loadLibrary( LibraryInfo libraryInfo ) {
+        LibraryScreen.this.libraryInfo = libraryInfo;
+        setupProjects( libraryInfo.getProjects() );
+        setupOus( libraryInfo );
+        projectsDocks.refresh();
+    }
+
+    private void setupOus( LibraryInfo libraryInfo ) {
+        view.clearOrganizationUnits();
+        libraryInfo.getOrganizationUnits().forEach( ou -> view.addOrganizationUnit( ou.getIdentifier() ) );
+    }
+
+    private void updateLibrary( String ou ) {
+        projectsService.call( new RemoteCallback<LibraryInfo>() {
+            @Override
+            public void callback( LibraryInfo libraryInfo ) {
+                LibraryScreen.this.libraryInfo = libraryInfo;
+                setupProjects( libraryInfo.getProjects() );
+            }
+        } ).getLibraryInfo( ou );
+    }
+
+    private void setupProjects( Set<Project> projects ) {
+        view.clearProjects();
+
+        //TODO project id or project name?
+        projects.stream().forEach( p -> view
+                .addProject( p.getProjectName(), "01/01/2001", detailsCommand( p.getIdentifier() ),
+                             selectCommand( p.getIdentifier() ) ) );
     }
 
     public void newProject() {
@@ -104,55 +133,38 @@ public class LibraryScreen {
         placeManager.goTo( new DefaultPlaceRequest( "NewProjectScreen", param ) );
     }
 
-    private void loadLibrary( LibraryInfo libraryInfo ) {
-        setupProjects( libraryInfo.getProjects() );
-        setupOus( libraryInfo );
-        projectsDocks.refresh();
-    }
+    //TODO
+    @Inject
+    private Event<SocialFileSelectedEvent> socialEvent;
 
-    private void setupOus( LibraryInfo libraryInfo ) {
-        view.clearOrganizationUnits();
-        //TODO setup default ou
-        libraryInfo.getOrganizationUnits().forEach( ou -> view.addOrganizationUnit( ou.getNome() ) );
-    }
-
-    public void organizationUnitChange( @Observes OrganizationUnitChangeEvent event ) {
-        reloadProjects( event.getOrganizationUnit() );
-    }
-
-    private void reloadProjects( String organizationUnit ) {
-        view.clearFilterText();
-        projectsService.call( new RemoteCallback<List<Project>>() {
-            @Override
-            public void callback( List<Project> projects ) {
-                setupProjects( projects );
-            }
-        } ).getProjects( organizationUnit );
-    }
-
-    private void setupProjects( List<Project> projects ) {
-        view.clearProjects();
-        projects.stream().forEach( p -> view
-                .addProject( p.getNome(), p.getCreationDate(), detailsCommand( p.getNome() ), selectCommand( p.getNome() ) ) );
-    }
-
-    private Command selectCommand( String nome ) {
+    private Command selectCommand( String id ) {
         return () -> {
-            GWT.log( "select" );
+            //check permissions like DefaultSocialLinkCommandGenerator.java
+            placeManager.goTo( "AuthoringPerspective" );
+            socialEvent.fire( new SocialFileSelectedEvent( "NEW_PROJECT", id ) );
         };
     }
 
     private Command detailsCommand( String selectedProject ) {
-        String currentProject = null;
         return () -> {
             //TODO Open Details Screen
             GWT.log( "details" );
-//            projectsDocks.handle(selectedProject);
+            projectsDocks.handle( selectedProject );
         };
     }
 
     public void selectOrganizationUnit( String ou ) {
-        organizationUnitChangeEvent.fire( new OrganizationUnitChangeEvent( ou ) );
+        updateLibrary( ou );
+    }
+
+    public void filterProjects( String filter ) {
+        if ( libraryInfo != null && libraryInfo.fullLibrary() ) {
+            Set<Project> filteredProjects = libraryInfo.getProjects().stream()
+                    .filter( p -> p.getProjectName().toUpperCase()
+                            .startsWith( filter.toUpperCase() ) )
+                    .collect( Collectors.toSet() );
+            setupProjects( filteredProjects );
+        }
     }
 
     @WorkbenchPartTitle
@@ -163,15 +175,5 @@ public class LibraryScreen {
     @WorkbenchPartView
     public UberElement<LibraryScreen> getView() {
         return view;
-    }
-
-    public void filterProjects( String filter ) {
-        if ( libraryInfo.fullLibrary() ) {
-            List<Project> filteredProjects = libraryInfo.getProjects().stream()
-                    .filter( p -> p.getNome().toUpperCase()
-                            .startsWith( filter.toUpperCase() ) )
-                    .collect( Collectors.toList() );
-            setupProjects( filteredProjects );
-        }
     }
 }
