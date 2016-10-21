@@ -16,21 +16,31 @@
 
 package org.uberfire.ext.aut.client.screens;
 
+import com.google.gwt.core.client.GWT;
+import org.guvnor.structure.organizationalunit.OrganizationalUnit;
+import org.jboss.errai.common.client.api.Caller;
+import org.jboss.errai.common.client.api.ErrorCallback;
+import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
+import org.kie.uberfire.social.activities.model.SocialFileSelectedEvent;
+import org.kie.workbench.common.services.shared.project.KieProject;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UberElement;
+import org.uberfire.ext.aut.api.LibraryService;
 import org.uberfire.ext.widgets.common.client.breadcrumbs.UberfireBreadcrumbs;
+import org.uberfire.ext.widgets.common.client.common.BusyIndicatorView;
+import org.uberfire.ext.widgets.table.client.resources.i18n.CommonConstants;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.PlaceRequest;
 import org.uberfire.mvp.impl.DefaultPlaceRequest;
+import org.uberfire.workbench.events.NotificationEvent;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
 
 @WorkbenchScreen( identifier = "NewProjectScreen" )
 public class NewProjectScreen {
@@ -39,143 +49,87 @@ public class NewProjectScreen {
     @Inject
     private PlaceManager placeManager;
 
-//    @Inject
-//    private Caller<KieProjectService> projectServiceCaller;
-//
-//    @Inject
-//    private Caller<RepositoryService> repositoryService;
-//
-//    @Inject
-//    private Caller<OrganizationalUnitService> organizationalUnitService;
-//
-//    @Inject
-//    private BusyIndicatorView busyIndicatorView;
-//
-//    @Inject
-//    private Event<NotificationEvent> notificationEvent;
-//
-//    private Collection<OrganizationalUnit> organizationalUnits;
-//    private Optional<OrganizationalUnit> defaultOU;
-//    private Repository repository;
-//
-//    @Inject
-//    private ConflictingRepositoriesPopup conflictingRepositoriesPopup;
+    @Inject
+    private Caller<LibraryService> libraryService;
+
+
+    @Inject
+    private BusyIndicatorView busyIndicatorView;
+
+    @Inject
+    private Event<NotificationEvent> notificationEvent;
 
     @Inject
     private UberfireBreadcrumbs breadcrumbs;
 
+    //TODO
+    @Inject
+    private Event<SocialFileSelectedEvent> socialEvent;
+
     private DefaultPlaceRequest backPlaceRequest;
+    private String selectOu = "";
 
     @OnStartup
     public void onStartup( final PlaceRequest place ) {
         String placeTarget = place.getParameter( "backPlace", "EmptyLibraryScreen" );
         this.backPlaceRequest = new DefaultPlaceRequest( placeTarget );
-
+        this.selectOu = place.getParameter( "selected_ou", "" );
+        if ( this.selectOu.isEmpty() ) {
+            libraryService.call( new RemoteCallback<OrganizationalUnit>() {
+                @Override
+                public void callback( OrganizationalUnit o ) {
+                    NewProjectScreen.this.selectOu = o.getIdentifier();
+                    //OU
+                    view.setGroupName( selectOu );
+                }
+            } ).getDefaultOrganizationalUnit();
+        }
+        else{
+            view.setGroupName( selectOu );
+        }
     }
-
-    @AfterInitialization
-    public void load() {
-//        //TODO ederign handle if there is no OU
-//        organizationalUnitService.call( new RemoteCallback<Collection<OrganizationalUnit>>() {
-//            @Override
-//            public void callback( Collection<OrganizationalUnit> organizationalUnits ) {
-//                NewProjectScreen.this.organizationalUnits = organizationalUnits;
-//                NewProjectScreen.this.defaultOU = organizationalUnits.stream().findFirst();
-//                getRepo();
-//                view.setGroupName( defaultOU.get().getName() );
-//            }
-//        } ).getOrganizationalUnits();
-
-    }
-
-    private void getRepo() {
-//        repositoryService.call( new RemoteCallback<Repository>() {
-//            @Override
-//            public void callback( Repository repository ) {
-//                if ( repository != null ) {
-//                    NewProjectScreen.this.repository = repository;
-//                } else {
-//                    createDefaultRepo();
-//                }
-//
-//            }
-//        }, new ErrorCallback<Repository>() {
-//            @Override
-//            public boolean error( Repository repository, Throwable throwable ) {
-//                Window.alert( "TODO GET REPOSITORY" );
-//                return false;
-//            }
-//        } ).getRepository( "default-" + defaultOU.get().getName() );
-    }
-
-    private void createDefaultRepo() {
-//        final String scheme = "git";
-//        final String alias = "default-" + defaultOU.get().getName();
-//        final RepositoryEnvironmentConfigurations configuration = new RepositoryEnvironmentConfigurations();
-//        configuration.setManaged( true );
-//
-//
-//        repositoryService.call( new RemoteCallback<Repository>() {
-//            @Override
-//            public void callback( Repository repository ) {
-//                NewProjectScreen.this.repository = repository;
-//            }
-//        }, new ErrorCallback<Repository>() {
-//            @Override
-//            public boolean error( Repository repository, Throwable throwable ) {
-//                Window.alert( "createRepository" );
-//                return false;
-//            }
-//        } ).createRepository( defaultOU.get(), scheme, alias, configuration );
-    }
-
 
     public void back() {
         placeManager.goTo( backPlaceRequest );
     }
 
-//    public void createProject( String projectName ) {
-//
-//
-//        Path repoRoot = repository.getRoot();
-//        POM pom = new POMBuilder()
-//                .setGroupId( "me.ederign" )
-//                .setPackaging( "jar" )
-//                .setVersion( "1.0.0" )
-//                .setProjectName( projectName )
-//                .build();
-//        DeploymentMode mode = DeploymentMode.VALIDATED;
-//        final String url = GWT.getModuleBaseURL();
-//        final String baseUrl = url.replace( GWT.getModuleName() + "/", "" );
-//
-//        busyIndicatorView.showBusyIndicator( CommonConstants.INSTANCE.Saving() );
-//        projectServiceCaller.call( getSuccessCallback(),
-//                                   new CommandWithThrowableDrivenErrorCallback( busyIndicatorView,
-//                                                                                createErrorsHandler( pom ) ) )
-//                .newProject( repoRoot, pom, baseUrl, mode );
-//    }
-//
-//    private RemoteCallback<KieProject> getSuccessCallback() {
-//        return new RemoteCallback<KieProject>() {
-//
-//            @Override
-//            public void callback( final KieProject project ) {
-//
-//                busyIndicatorView.hideBusyIndicator();
-//                notificationEvent.fire( new NotificationEvent( CommonConstants.INSTANCE.ItemCreatedSuccessfully() ) );
-//                openProject( project.getProjectName() );
-//            }
-//        };
-//    }
+    public void createProject( String projectName ) {
+        busyIndicatorView.showBusyIndicator( "Saving" );
 
-    private void openProject( String projectName ) {
+        libraryService.call( getSuccessCallback(), getErrorCallBack() ).newProject( projectName, selectOu );
+    }
+
+    private ErrorCallback<?> getErrorCallBack() {
+        return null;
+    }
+
+    private RemoteCallback<KieProject> getSuccessCallback() {
+        return new RemoteCallback<KieProject>() {
+            @Override
+            public void callback( final KieProject project ) {
+                GWT.log(project + "");
+                GWT.log(project.getIdentifier() + "");
+                GWT.log(project.getProjectName() + "");
+                GWT.log(project + "");
+
+
+                busyIndicatorView.hideBusyIndicator();
+                notificationEvent.fire( new NotificationEvent( "Project Created" ) );
+                openProject( project );
+            }
+        };
+    }
+
+    private void openProject( KieProject project ) {
         //TODO ederign
-        breadcrumbs.createRoot( "ProjectsPerspective", "All Projects", new DefaultPlaceRequest( "ProjectsPerspective" ),
-                                true );
-        Map<String, String> params = new HashMap<>();
-        params.put( "projectName", projectName );
-        //ou and others parameters here
-        breadcrumbs.navigateTo( projectName, new DefaultPlaceRequest( "ProjectScreen", params ) );
+//        breadcrumbs.createRoot( "ProjectsPerspective", "All Projects", new DefaultPlaceRequest( "ProjectsPerspective" ),
+//                                true );
+//        Map<String, String> params = new HashMap<>();
+//        params.put( "projectName", projectName );
+//        ou and others parameters here
+//        breadcrumbs.navigateTo( projectName, new DefaultPlaceRequest( "ProjectScreen", params ) );
+        placeManager.goTo( "AuthoringPerspective" );
+        socialEvent.fire( new SocialFileSelectedEvent( "NEW_PROJECT", project.getIdentifier() ) );
     }
 
     public interface View extends UberElement<NewProjectScreen> {

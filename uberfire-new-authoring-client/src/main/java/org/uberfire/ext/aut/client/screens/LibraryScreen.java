@@ -64,7 +64,7 @@ public class LibraryScreen {
     private View view;
 
     @Inject
-    private Caller<LibraryService> projectsService;
+    private Caller<LibraryService> libraryService;
 
     @Inject
     private UberfireDocks uberfireDocks;
@@ -79,10 +79,11 @@ public class LibraryScreen {
     public void onOpen() {
 
         loadDefaultLibrary();
+
     }
 
     private void loadDefaultLibrary() {
-        projectsService.call( new RemoteCallback<LibraryInfo>() {
+        libraryService.call( new RemoteCallback<LibraryInfo>() {
             @Override
             public void callback( LibraryInfo libraryInfo ) {
                 if ( libraryInfo.fullLibrary() ) {
@@ -90,7 +91,9 @@ public class LibraryScreen {
                 } else if ( !libraryInfo.hasDefaultOu() ) {
                     GWT.log( "GOTO ADM SCREEN WITH A POPUP TELLING THAT NEEDS A OU" );
                 } else {
-                    GWT.log( "GOTO NEW PROJECT SCREEN" );
+
+                    //NO PROJECTS, if there is on default ou,
+                    loadLibrary( libraryInfo );
                 }
             }
         } ).getDefaultLibraryInfo();
@@ -109,10 +112,11 @@ public class LibraryScreen {
     }
 
     private void updateLibrary( String ou ) {
-        projectsService.call( new RemoteCallback<LibraryInfo>() {
+        libraryService.call( new RemoteCallback<LibraryInfo>() {
             @Override
             public void callback( LibraryInfo libraryInfo ) {
                 LibraryScreen.this.libraryInfo = libraryInfo;
+                view.clearFilterText();
                 setupProjects( libraryInfo.getProjects() );
             }
         } ).getLibraryInfo( ou );
@@ -130,6 +134,7 @@ public class LibraryScreen {
     public void newProject() {
         Map<String, String> param = new HashMap<>();
         param.put( "backPlace", "LibraryScreen" );
+        param.put( "selected_ou", libraryInfo.getSelectedOrganizationUnit().getIdentifier() );
         placeManager.goTo( new DefaultPlaceRequest( "NewProjectScreen", param ) );
     }
 
@@ -154,6 +159,7 @@ public class LibraryScreen {
     }
 
     public void selectOrganizationUnit( String ou ) {
+
         updateLibrary( ou );
     }
 
@@ -163,6 +169,7 @@ public class LibraryScreen {
                     .filter( p -> p.getProjectName().toUpperCase()
                             .startsWith( filter.toUpperCase() ) )
                     .collect( Collectors.toSet() );
+
             setupProjects( filteredProjects );
         }
     }

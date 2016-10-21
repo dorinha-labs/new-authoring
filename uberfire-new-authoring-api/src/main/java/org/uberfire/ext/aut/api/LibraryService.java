@@ -16,13 +16,18 @@
 
 package org.uberfire.ext.aut.api;
 
+import org.guvnor.structure.organizationalunit.OrganizationalUnit;
 import org.jboss.errai.bus.server.annotations.Remote;
+import org.kie.workbench.common.services.shared.project.KieProject;
 
 @Remote
 public interface LibraryService {
+
+    OrganizationalUnit getDefaultOrganizationalUnit();
 
     LibraryInfo getDefaultLibraryInfo();
 
     LibraryInfo getLibraryInfo( String selectedOuIdentifier );
 
+    KieProject newProject( String projectName, String selectOu );
 }

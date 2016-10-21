@@ -43,7 +43,7 @@
     </dependency>
 
     <dependency>
-      <groupId>org.kie</groupId>
+      <groupId>org.kie.uberfire</groupId>
       <version>7.0.0-SNAPSHOT</version>
       <artifactId>kie-uberfire-social-activities-api</artifactId>
     </dependency>

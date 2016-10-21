@@ -11,6 +11,7 @@ import java.util.Set;
 public class LibraryInfo {
 
     private OrganizationalUnit defaultOrganizationUnit;
+    private OrganizationalUnit selectedOrganizationUnit;
     private Set<Project> projects = new HashSet<>();
     private Collection<OrganizationalUnit> organizationUnits = new ArrayList<>();
 
@@ -18,9 +19,11 @@ public class LibraryInfo {
     }
 
     public LibraryInfo( OrganizationalUnit defaultOrganizationUnit,
+                        OrganizationalUnit selectedOrganizationUnit,
                         Set<Project> projects,
                         Collection<OrganizationalUnit> organizationUnits ) {
         this.defaultOrganizationUnit = defaultOrganizationUnit;
+        this.selectedOrganizationUnit = selectedOrganizationUnit;
         this.projects = projects;
         this.organizationUnits = organizationUnits;
     }
@@ -47,5 +50,9 @@ public class LibraryInfo {
 
     public boolean hasDefaultOu() {
         return defaultOrganizationUnit != null;
+    }
+
+    public OrganizationalUnit getSelectedOrganizationUnit() {
+        return selectedOrganizationUnit;
     }
 }

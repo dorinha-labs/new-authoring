@@ -55,16 +55,15 @@ public class NewProjectView implements NewProjectScreen.View, IsElement {
     }
 
     @SinkNative( Event.ONCLICK )
-    @EventHandler( "create" )
-    public void createProject( Event e ) {
-        GWT.log("c");
-//        presenter.createProject( projectName.getValue() );
+    @EventHandler( "cancel" )
+    public void cancel( Event e ) {
+        presenter.back();
     }
 
     @SinkNative( Event.ONCLICK )
-    @EventHandler( "cancel" )
-    public void newProject( Event e ) {
-        presenter.back();
+    @EventHandler( "create" )
+    public void createProject( Event e ) {
+        presenter.createProject( projectName.getValue() );
     }
 
 
