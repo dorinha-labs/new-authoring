@@ -30,6 +30,7 @@ import org.uberfire.client.workbench.docks.UberfireDocks;
 import org.uberfire.ext.aut.api.LibraryInfo;
 import org.uberfire.ext.aut.api.LibraryService;
 import org.uberfire.ext.aut.client.util.ProjectsDocks;
+import org.uberfire.ext.widgets.common.client.breadcrumbs.UberfireBreadcrumbs;
 import org.uberfire.lifecycle.OnOpen;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.impl.DefaultPlaceRequest;
@@ -38,6 +39,7 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -74,6 +76,9 @@ public class LibraryScreen {
 
     @Inject
     private PlaceManager placeManager;
+
+    @Inject
+    private UberfireBreadcrumbs breadcrumbs;
 
     @OnOpen
     public void onOpen() {
@@ -128,25 +133,34 @@ public class LibraryScreen {
         //TODO project id or project name?
         projects.stream().forEach( p -> view
                 .addProject( p.getProjectName(), "01/01/2001", detailsCommand( p.getIdentifier() ),
-                             selectCommand( p.getIdentifier() ) ) );
-    }
-
-    public void newProject() {
-        Map<String, String> param = new HashMap<>();
-        param.put( "backPlace", "LibraryScreen" );
-        param.put( "selected_ou", libraryInfo.getSelectedOrganizationUnit().getIdentifier() );
-        placeManager.goTo( new DefaultPlaceRequest( "NewProjectScreen", param ) );
+                             selectCommand( p ) ) );
     }
 
     //TODO
     @Inject
     private Event<SocialFileSelectedEvent> socialEvent;
 
-    private Command selectCommand( String id ) {
+    public void newProject() {
+        Map<String, String> param = new HashMap<>();
+        param.put( "backPlace", "LibraryScreen" );
+        param.put( "selected_ou", libraryInfo.getSelectedOrganizationUnit().getIdentifier() );
+
+        placeManager.goTo( new DefaultPlaceRequest( "NewProjectScreen", param ) );
+    }
+
+    private Command selectCommand( Project project ) {
         return () -> {
+
+            breadcrumbs.createRoot( "AuthoringPerspective", "All Projects",
+                                    new DefaultPlaceRequest( "LibraryPerspective" ),
+                                    false );
+            breadcrumbs
+                    .addBreadCrumb( "AuthoringPerspective", project.getProjectName(), new DefaultPlaceRequest( "AuthoringPerspective" ), Optional.empty() );
+            placeManager.goTo( new DefaultPlaceRequest( "AuthoringPerspective" ) );
             //check permissions like DefaultSocialLinkCommandGenerator.java
-            placeManager.goTo( "AuthoringPerspective" );
-            socialEvent.fire( new SocialFileSelectedEvent( "NEW_PROJECT", id ) );
+            socialEvent.fire( new SocialFileSelectedEvent( "NEW_PROJECT", project.getIdentifier() ) );
+            //MOVE IT to breadcrumbs
+//            breadcrumbs.resetBreadCrumbs( "AuthoringPerspective" );
         };
     }
 
