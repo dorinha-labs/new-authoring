@@ -23,18 +23,19 @@ import org.guvnor.common.services.project.service.DeploymentMode;
 import org.guvnor.structure.organizationalunit.OrganizationalUnit;
 import org.guvnor.structure.organizationalunit.OrganizationalUnitService;
 import org.guvnor.structure.repositories.Repository;
+import org.guvnor.structure.repositories.RepositoryEnvironmentConfigurations;
 import org.guvnor.structure.repositories.RepositoryService;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.kie.workbench.common.services.shared.project.KieProject;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.ext.aut.api.LibraryInfo;
+import org.uberfire.ext.aut.api.LibraryPreferences;
 import org.uberfire.ext.aut.api.LibraryService;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
@@ -43,7 +44,7 @@ import java.util.Set;
 public class LibraryServiceImpl implements LibraryService {
 
     @Inject
-    private OrganizationalUnitService service;
+    private OrganizationalUnitService ouService;
 
     @Inject
     private RepositoryService repositoryService;
@@ -51,31 +52,41 @@ public class LibraryServiceImpl implements LibraryService {
     @Inject
     private KieProjectService kieProjectService;
 
+    @Inject
+    private LibraryPreferences preferences;
+
     @Override
     public OrganizationalUnit getDefaultOrganizationalUnit() {
-        Collection<OrganizationalUnit> organizationalUnits = service.getOrganizationalUnits();
-        return getDefaultOU( organizationalUnits );
+        Collection<OrganizationalUnit> organizationalUnits = getOrganizationalUnits();
+
+        LibraryPreferences preferences = getPreferences();
+
+        OrganizationalUnit defaultOU = getOU( preferences.getOuName(), organizationalUnits );
+        if ( defaultOU == null ) {
+            return createDefaultOU();
+        }
+
+        return defaultOU;
     }
 
     @Override
     public LibraryInfo getDefaultLibraryInfo() {
 
-        Collection<OrganizationalUnit> organizationalUnits = service.getOrganizationalUnits();
-        OrganizationalUnit defaultOU = getDefaultOU( organizationalUnits );
+        OrganizationalUnit defaultOU = getDefaultOrganizationalUnit();
 
         LibraryInfo libraryInfo = new LibraryInfo(
                 defaultOU,
                 defaultOU,
                 getProjects( defaultOU ),
-                organizationalUnits );
+                getOrganizationalUnits() );
 
         return libraryInfo;
     }
 
     @Override
     public LibraryInfo getLibraryInfo( String selectedOuIdentifier ) {
-        Collection<OrganizationalUnit> organizationalUnits = service.getOrganizationalUnits();
-        OrganizationalUnit defaultOU = getDefaultOU( organizationalUnits );
+        Collection<OrganizationalUnit> organizationalUnits = getOrganizationalUnits();
+        OrganizationalUnit defaultOU = getDefaultOrganizationalUnit();
         OrganizationalUnit selectedOU = getOU( selectedOuIdentifier, organizationalUnits );
 
 
@@ -89,82 +100,84 @@ public class LibraryServiceImpl implements LibraryService {
 
     }
 
-    @Override
-    public KieProject newProject( String projectName, String selectOu ) {
-        Collection<OrganizationalUnit> organizationalUnits = service.getOrganizationalUnits();
-        OrganizationalUnit selectedOU = getOU( selectOu, organizationalUnits );
-        Repository repository = selectedOU.getRepositories().stream().findFirst().get();
-        Path repoRoot = repository.getRoot();
-        GAV gav = new GAV( "me.ederign", projectName, "1.0.0" );
 
-        POM pom = new POM(projectName, "description", gav);
-        DeploymentMode mode = DeploymentMode.VALIDATED;
-        ///?
-        String baseURL = "http://localhost";
-        KieProject kieProject = kieProjectService.newProject( repoRoot, pom, mode.name() );
-        System.out.println();
+    private OrganizationalUnit createDefaultOU() {
+        LibraryPreferences preferences = getPreferences();
 
-        return kieProject;
-//        final String url = GWT.getModuleBaseURL();
-//        final String baseUrl = url.replace( GWT.getModuleName() + "/", "" );
-//
-//        busyIndicatorView.showBusyIndicator( CommonConstants.INSTANCE.Saving() );
-//        projectServiceCaller.call( getSuccessCallback(),
-//                                   new CommandWithThrowableDrivenErrorCallback( busyIndicatorView,
-//                                                                                createErrorsHandler( pom ) ) )
-//                .newProject( repoRoot, pom, baseUrl, mode );
-//    }
-//
-//
+        return ouService.createOrganizationalUnit( preferences.getOuName(), preferences.getoUOwner(),
+                                                   preferences.getoUGroupId() );
     }
 
     private OrganizationalUnit getOU( String ouIdentifier, Collection<OrganizationalUnit> organizationalUnits ) {
-        //READ FROM PREFERENCES
-        Optional<OrganizationalUnit> defaultOU = organizationalUnits.stream()
+        Optional<OrganizationalUnit> targetOU = organizationalUnits.stream()
                 .filter( p -> p.getIdentifier().equalsIgnoreCase( ouIdentifier ) ).findFirst();
-        if ( defaultOU.isPresent() ) {
-            return defaultOU.get();
+        if ( targetOU.isPresent() ) {
+            return targetOU.get();
         }
         return null;
     }
 
-    private OrganizationalUnit getDefaultOU( Collection<OrganizationalUnit> organizationalUnits ) {
-        //READ FROM PREFERENCES
-        Optional<OrganizationalUnit> defaultOU = organizationalUnits.stream().findFirst();
-        if ( defaultOU.isPresent() ) {
-            return defaultOU.get();
-        }
-        return null;
+    private Collection<OrganizationalUnit> getOrganizationalUnits() {
+        return ouService.getOrganizationalUnits();
     }
+
+
+    @Override
+    public KieProject newProject( String projectName, String selectOu ) {
+        Collection<OrganizationalUnit> organizationalUnits = getOrganizationalUnits();
+        OrganizationalUnit selectedOU = getOU( selectOu, organizationalUnits );
+        Repository repository = getDefaultRepository( selectedOU );
+        Path repoRoot = repository.getRoot();
+        LibraryPreferences preferences = getPreferences();
+
+        GAV gav = new GAV( preferences.getProjectGroupId(), projectName, preferences.getProjectVersion() );
+
+        POM pom = new POM( projectName, preferences.getProjectDescription(), gav );
+        DeploymentMode mode = DeploymentMode.VALIDATED;
+
+        KieProject kieProject = kieProjectService.newProject( repoRoot, pom, mode.name() );
+
+        return kieProject;
+    }
+
 
     private Set<Project> getProjects( OrganizationalUnit ou ) {
-        if ( ou != null && ou.getRepositories() != null ) {
-            Repository repository = ou.getRepositories().stream().findFirst().get();
-            return kieProjectService.getProjects( repository, "master" );
-        } else {
-            return Collections.emptySet();
+
+        Repository defaultRepository = getDefaultRepository( ou );
+        if ( defaultRepository == null ) {
+            defaultRepository = createDefaultRepo( ou );
         }
+        return kieProjectService.getProjects( defaultRepository, getPreferences().getProjectDefaultBranch() );
     }
 
-    private void createDefaultRepo() {
-//        final String scheme = "git";
-//        final String alias = "default-" + defaultOU.get().getName();
-//        final RepositoryEnvironmentConfigurations configuration = new RepositoryEnvironmentConfigurations();
-//        configuration.setManaged( true );
-//
-//
-//        repositoryService.call( new RemoteCallback<Repository>() {
-//            @Override
-//            public void callback( Repository repository ) {
-//                NewProjectScreen.this.repository = repository;
-//            }
-//        }, new ErrorCallback<Repository>() {
-//            @Override
-//            public boolean error( Repository repository, Throwable throwable ) {
-//                Window.alert( "createRepository" );
-//                return false;
-//            }
-//        } ).createRepository( defaultOU.get(), scheme, alias, configuration );
+    private Repository getDefaultRepository( OrganizationalUnit ou ) {
+        String defaultRepositoryName = getDefaultRepositoryName( ou );
+        Optional<Repository> repo = ou.getRepositories().stream()
+                .filter( r -> r.getAlias().equalsIgnoreCase( defaultRepositoryName ) )
+                .findAny();
+        if ( !repo.isPresent() ) {
+            return createDefaultRepo( ou );
+        }
+        return repo.get();
+    }
+
+    private Repository createDefaultRepo( OrganizationalUnit ou ) {
+        LibraryPreferences preferences = getPreferences();
+        final String scheme = preferences.getRepositoryDefaultScheme();
+        final String alias = getDefaultRepositoryName( ou );
+        final RepositoryEnvironmentConfigurations configuration = new RepositoryEnvironmentConfigurations();
+        configuration.setManaged( true );
+
+        return repositoryService.createRepository( ou, scheme, alias, configuration );
+    }
+
+    private String getDefaultRepositoryName( OrganizationalUnit ou ) {
+        return ou.getIdentifier() + "-" + getPreferences().getRepositoryId();
+    }
+
+    private LibraryPreferences getPreferences() {
+        preferences.load();
+        return preferences;
     }
 
 }

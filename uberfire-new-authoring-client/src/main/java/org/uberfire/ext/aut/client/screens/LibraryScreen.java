@@ -80,7 +80,6 @@ public class LibraryScreen {
 
     @OnOpen
     public void onOpen() {
-
         loadDefaultLibrary();
     }
 
@@ -95,12 +94,8 @@ public class LibraryScreen {
             public void callback( LibraryInfo libraryInfo ) {
                 if ( libraryInfo.fullLibrary() ) {
                     loadLibrary( libraryInfo );
-                } else if ( !libraryInfo.hasDefaultOu() ) {
-                    GWT.log( "GOTO ADM SCREEN WITH A POPUP TELLING THAT NEEDS A OU" );
-                } else {
-
-                    //NO PROJECTS, if there is on default ou,
-                    loadLibrary( libraryInfo );
+                } else  {
+                    placeManager.goTo( "NewProjectPerspective" );
                 }
             }
         } ).getDefaultLibraryInfo();

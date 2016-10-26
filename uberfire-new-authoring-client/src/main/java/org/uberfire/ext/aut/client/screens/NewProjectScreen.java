@@ -79,7 +79,6 @@ public class NewProjectScreen {
                 @Override
                 public void callback( OrganizationalUnit o ) {
                     NewProjectScreen.this.selectOu = o.getIdentifier();
-                    //OU
                     view.setGroupName( selectOu );
                 }
             } ).getDefaultOrganizationalUnit();
