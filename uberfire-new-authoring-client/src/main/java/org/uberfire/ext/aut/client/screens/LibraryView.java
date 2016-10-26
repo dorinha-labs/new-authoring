@@ -19,10 +19,6 @@ public class LibraryView implements LibraryScreen.View, IsElement {
 
     @DataField
     @Inject
-    Select teamDropdown;
-
-    @DataField
-    @Inject
     Div projectList;
 
     @DataField
@@ -42,7 +38,6 @@ public class LibraryView implements LibraryScreen.View, IsElement {
     @Override
     public void init( LibraryScreen presenter ) {
         this.presenter = presenter;
-        teamDropdown.setOnchange( event -> presenter.selectOrganizationUnit( teamDropdown.getValue() ) );
     }
 
     @Override
@@ -55,16 +50,6 @@ public class LibraryView implements LibraryScreen.View, IsElement {
         ProjectItemWidget projectItemWidget = itemWidgetsInstances.get();
         projectItemWidget.init( project, projectCreated, details, select );
         projectList.appendChild( projectItemWidget.getElement() );
-    }
-
-    @Override
-    public void addOrganizationUnit( String ou ) {
-        teamDropdown.add( createOption( ou ) );
-    }
-
-    @Override
-    public void clearOrganizationUnits() {
-        DOMUtil.removeAllChildren( teamDropdown );
     }
 
     @Override
