@@ -44,15 +44,6 @@ public class NewProjectPerspective extends Composite {
     @Inject
     PlaceManager placeManager;
 
-    @OnStartup
-    public void onStartup( final PlaceRequest place ) {
-
-    }
-
-    @OnOpen
-    public void onOpen() {
-    }
-
     @Perspective
     public PerspectiveDefinition buildPerspective() {
         final PerspectiveDefinition p = new PerspectiveDefinitionImpl( "org.uberfire.client.workbench.panels.impl.StaticWorkbenchPanelPresenter" );

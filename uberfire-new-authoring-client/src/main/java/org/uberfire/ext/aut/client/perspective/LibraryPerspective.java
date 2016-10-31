@@ -55,19 +55,6 @@ public class LibraryPerspective extends Composite {
         projectsDocks.start();
     }
 
-    @PostConstruct
-    public void setup() {
-    }
-
-    @OnStartup
-    public void onStartup( final PlaceRequest place ) {
-    }
-
-    @OnOpen
-    public void onOpen() {
-
-    }
-
 
     @Perspective
     public PerspectiveDefinition buildPerspective() {

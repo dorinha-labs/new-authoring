@@ -17,6 +17,7 @@
 package org.uberfire.ext.aut.client.widgets;
 
 import org.uberfire.client.mvp.UberElement;
+import org.uberfire.ext.aut.api.LibraryInfo;
 import org.uberfire.mvp.ParameterizedCommand;
 
 import javax.inject.Inject;
@@ -30,6 +31,7 @@ public class LibraryBreadCrumbToolbarPresenter {
 
         void clearOrganizationUnits();
 
+        void setOrganizationUnitSelected( String identifier );
     }
 
     @Inject
@@ -37,23 +39,30 @@ public class LibraryBreadCrumbToolbarPresenter {
 
     private ParameterizedCommand<String> selectCommand;
 
-    public void init( ParameterizedCommand<String> selectCommand ) {
+    public void init( ParameterizedCommand<String> selectCommand, LibraryInfo libraryInfo ) {
         this.selectCommand = selectCommand;
         view.init( this );
+        clearOrganizationUnits();
+        libraryInfo.getOrganizationUnits()
+                .forEach( ou -> addOrganizationUnit( ou.getIdentifier() ) );
+        setOrganizationUnitSelected( libraryInfo.getDefaultOrganizationUnit().getIdentifier() );
     }
 
-    public void selectOrganizationUnit( String value ) {
+    void selectOrganizationUnit( String value ) {
         selectCommand.execute( value );
     }
 
-    public void addOrganizationUnit( String identifier ) {
+    private void addOrganizationUnit( String identifier ) {
         view.addOrganizationUnit( identifier );
     }
 
-    public void clearOrganizationUnits() {
+    private void clearOrganizationUnits() {
         view.clearOrganizationUnits();
     }
 
+    private void setOrganizationUnitSelected( String identifier ) {
+        view.setOrganizationUnitSelected( identifier );
+    }
 
     public UberElement<LibraryBreadCrumbToolbarPresenter> getView() {
         return view;

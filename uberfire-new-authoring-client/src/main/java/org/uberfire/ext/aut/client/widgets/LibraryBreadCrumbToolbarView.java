@@ -39,6 +39,11 @@ public class LibraryBreadCrumbToolbarView implements LibraryBreadCrumbToolbarPre
         DOMUtil.removeAllChildren( teamDropdown );
     }
 
+    @Override
+    public void setOrganizationUnitSelected( String identifier ) {
+        teamDropdown.setValue( identifier );
+    }
+
 
     private Option createOption( String ou ) {
         Option option = ( Option ) document.createElement( "option" );

@@ -35,6 +35,7 @@ public class EmptyLibraryScreen {
     public interface View extends UberElement<EmptyLibraryScreen> {
 
         void setup( String username );
+
     }
 
     @Inject
@@ -58,7 +59,7 @@ public class EmptyLibraryScreen {
     }
 
     public void runDemo( String demoID ) {
-        GWT.log( "DEMO " + demoID );
+
     }
 
     @WorkbenchPartTitle

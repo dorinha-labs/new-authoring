@@ -16,12 +16,10 @@
 
 package org.uberfire.ext.aut.client.screens;
 
-import com.google.gwt.core.client.GWT;
 import org.guvnor.structure.organizationalunit.OrganizationalUnit;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.kie.uberfire.social.activities.model.SocialFileSelectedEvent;
 import org.kie.workbench.common.services.shared.project.KieProject;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
@@ -30,9 +28,9 @@ import org.uberfire.client.annotations.WorkbenchScreen;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.ext.aut.api.LibraryService;
+import org.uberfire.ext.aut.client.events.NewProjectErrorEvent;
 import org.uberfire.ext.widgets.common.client.breadcrumbs.UberfireBreadcrumbs;
 import org.uberfire.ext.widgets.common.client.common.BusyIndicatorView;
-import org.uberfire.ext.widgets.table.client.resources.i18n.CommonConstants;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.PlaceRequest;
 import org.uberfire.mvp.impl.DefaultPlaceRequest;
@@ -45,13 +43,11 @@ import javax.inject.Inject;
 @WorkbenchScreen( identifier = "NewProjectScreen" )
 public class NewProjectScreen {
 
-
     @Inject
     private PlaceManager placeManager;
 
     @Inject
     private Caller<LibraryService> libraryService;
-
 
     @Inject
     private BusyIndicatorView busyIndicatorView;
@@ -60,32 +56,50 @@ public class NewProjectScreen {
     private Event<NotificationEvent> notificationEvent;
 
     @Inject
+    private Event<NewProjectErrorEvent> errorEvent;
+
+    @Inject
     private UberfireBreadcrumbs breadcrumbs;
+
+    @Inject
+    private View view;
 
     //TODO
     @Inject
     private Event<SocialFileSelectedEvent> socialEvent;
 
     private DefaultPlaceRequest backPlaceRequest;
+
     private String selectOu = "";
 
     @OnStartup
     public void onStartup( final PlaceRequest place ) {
-        String placeTarget = place.getParameter( "backPlace", "EmptyLibraryScreen" );
-        this.backPlaceRequest = new DefaultPlaceRequest( placeTarget );
+        setupBackPlaceRequest( place );
+        loadSelectedOU( place );
+    }
+
+    private void loadSelectedOU( PlaceRequest place ) {
         this.selectOu = place.getParameter( "selected_ou", "" );
         if ( this.selectOu.isEmpty() ) {
-            libraryService.call( new RemoteCallback<OrganizationalUnit>() {
-                @Override
-                public void callback( OrganizationalUnit o ) {
-                    NewProjectScreen.this.selectOu = o.getIdentifier();
-                    view.setGroupName( selectOu );
-                }
-            } ).getDefaultOrganizationalUnit();
-        }
-        else{
+            loadDefaultOU();
+        } else {
             view.setGroupName( selectOu );
         }
+    }
+
+    private void loadDefaultOU() {
+        libraryService.call( new RemoteCallback<OrganizationalUnit>() {
+            @Override
+            public void callback( OrganizationalUnit o ) {
+                NewProjectScreen.this.selectOu = o.getIdentifier();
+                view.setGroupName( selectOu );
+            }
+        } ).getDefaultOrganizationalUnit();
+    }
+
+    private void setupBackPlaceRequest( PlaceRequest place ) {
+        String placeTarget = place.getParameter( "backPlace", "EmptyLibraryScreen" );
+        this.backPlaceRequest = new DefaultPlaceRequest( placeTarget );
     }
 
     public void back() {
@@ -99,44 +113,49 @@ public class NewProjectScreen {
     }
 
     private ErrorCallback<?> getErrorCallBack() {
-        return null;
-    }
-
-    private RemoteCallback<KieProject> getSuccessCallback() {
-        return new RemoteCallback<KieProject>() {
-            @Override
-            public void callback( final KieProject project ) {
-                GWT.log(project + "");
-                GWT.log(project.getIdentifier() + "");
-                GWT.log(project.getProjectName() + "");
-                GWT.log(project + "");
-
-
-                busyIndicatorView.hideBusyIndicator();
-                notificationEvent.fire( new NotificationEvent( "Project Created" ) );
-                openProject( project );
-            }
+        return ( o, throwable ) -> {
+            hideLoadingBox();
+            notificationEvent.fire( new NotificationEvent( "Error creating a project.",
+                                                           NotificationEvent.NotificationType.ERROR ) );
+            return false;
         };
     }
 
+    private void hideLoadingBox() {
+        busyIndicatorView.hideBusyIndicator();
+    }
+
+    private RemoteCallback<KieProject> getSuccessCallback() {
+        return project -> {
+            hideLoadingBox();
+            notifySuccess();
+            setupBreadCrumbs( project );
+            openProject( project );
+        };
+    }
+
+    private void setupBreadCrumbs( KieProject project ) {
+        breadcrumbs.clearBreadCrumbs( "AuthoringPerspective" );
+        breadcrumbs.addBreadCrumb( "AuthoringPerspective", "All Projects",
+                                   new DefaultPlaceRequest( "LibraryPerspective" ) );
+        breadcrumbs
+                .addBreadCrumb( "AuthoringPerspective", project.getProjectName(),
+                                new DefaultPlaceRequest( "AuthoringPerspective" ) );
+    }
+
+    private void notifySuccess() {
+        notificationEvent.fire( new NotificationEvent( "Project Created" ) );
+    }
+
     private void openProject( KieProject project ) {
-        //TODO ederign
-//        breadcrumbs.createRoot( "ProjectsPerspective", "All Projects", new DefaultPlaceRequest( "ProjectsPerspective" ),
-//                                true );
-//        Map<String, String> params = new HashMap<>();
-//        params.put( "projectName", projectName );
-//        ou and others parameters here
-//        breadcrumbs.navigateTo( projectName, new DefaultPlaceRequest( "ProjectScreen", params ) );
         placeManager.goTo( "AuthoringPerspective" );
         socialEvent.fire( new SocialFileSelectedEvent( "NEW_PROJECT", project.getIdentifier() ) );
     }
 
+
     public interface View extends UberElement<NewProjectScreen> {
         void setGroupName( String name );
     }
-
-    @Inject
-    private View view;
 
     @PostConstruct
     public void setup() {
@@ -153,30 +172,4 @@ public class NewProjectScreen {
         return view;
     }
 
-
-//    private HashMap<Class<? extends Throwable>, CommandWithThrowableDrivenErrorCallback.CommandWithThrowable> createErrorsHandler(
-//            POM pom ) {
-//        return new HashMap<Class<? extends Throwable>, CommandWithThrowableDrivenErrorCallback.CommandWithThrowable>(
-//        ) {{
-//            put( GAVAlreadyExistsException.class,
-//                 new CommandWithThrowableDrivenErrorCallback.CommandWithThrowable() {
-//                     @Override
-//                     public void execute( final Throwable parameter ) {
-//                         GWT.log( "." );
-//                         busyIndicatorView.hideBusyIndicator();
-//                         conflictingRepositoriesPopup.setContent( pom.getGav(),
-//                                                                  ( ( GAVAlreadyExistsException ) parameter )
-//                                                                          .getRepositories(),
-//                                                                  new Command() {
-//                                                                      @Override
-//                                                                      public void execute() {
-//                                                                          conflictingRepositoriesPopup.hide();
-//                                                                          createProject( pom.getName() );
-//                                                                      }
-//                                                                  } );
-//                         conflictingRepositoriesPopup.show();
-//                     }
-//                 } );
-//        }};
-//    }
 }

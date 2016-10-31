@@ -46,16 +46,17 @@ import java.util.stream.Collectors;
 @WorkbenchScreen( identifier = "LibraryScreen" )
 public class LibraryScreen {
 
-    private LibraryInfo libraryInfo;
-
     public interface View extends UberElement<LibraryScreen> {
 
         void clearProjects();
 
-        void addProject( String project, String projectCreated, Command details, Command select );
+        void addProject( String project, Command details, Command select );
 
         void clearFilterText();
+
     }
+
+    private LibraryInfo libraryInfo;
 
     @Inject
     private View view;
@@ -78,6 +79,9 @@ public class LibraryScreen {
     @Inject
     private UberfireBreadcrumbs breadcrumbs;
 
+    @Inject
+    private Event<SocialFileSelectedEvent> socialEvent;
+
     @OnOpen
     public void onOpen() {
         loadDefaultLibrary();
@@ -94,7 +98,7 @@ public class LibraryScreen {
             public void callback( LibraryInfo libraryInfo ) {
                 if ( libraryInfo.fullLibrary() ) {
                     loadLibrary( libraryInfo );
-                } else  {
+                } else {
                     placeManager.goTo( "NewProjectPerspective" );
                 }
             }
@@ -113,10 +117,8 @@ public class LibraryScreen {
 
         breadCrumbToolbarPresenter.init( ou -> {
             selectOrganizationUnit( ou );
-        } );
-        breadCrumbToolbarPresenter.clearOrganizationUnits();
-        libraryInfo.getOrganizationUnits()
-                .forEach( ou -> breadCrumbToolbarPresenter.addOrganizationUnit( ou.getIdentifier() ) );
+        }, libraryInfo );
+
     }
 
     private void updateLibrary( String ou ) {
@@ -133,15 +135,11 @@ public class LibraryScreen {
     private void setupProjects( Set<Project> projects ) {
         view.clearProjects();
 
-        //TODO project id or project name?
         projects.stream().forEach( p -> view
-                .addProject( p.getProjectName(), "01/01/2001", detailsCommand( p.getIdentifier() ),
+                .addProject( p.getProjectName(), detailsCommand( p.getIdentifier() ),
                              selectCommand( p ) ) );
     }
 
-    //TODO
-    @Inject
-    private Event<SocialFileSelectedEvent> socialEvent;
 
     public void newProject() {
         Map<String, String> param = new HashMap<>();
@@ -164,8 +162,6 @@ public class LibraryScreen {
             placeManager.goTo( new DefaultPlaceRequest( "AuthoringPerspective" ) );
             //check permissions like DefaultSocialLinkCommandGenerator.java
             socialEvent.fire( new SocialFileSelectedEvent( "NEW_PROJECT", project.getIdentifier() ) );
-            //MOVE IT to breadcrumbs
-//            breadcrumbs.resetBreadCrumbs( "AuthoringPerspective" );
         };
     }
 

@@ -46,9 +46,9 @@ public class LibraryView implements LibraryScreen.View, IsElement {
     }
 
     @Override
-    public void addProject( String project, String projectCreated, Command details, Command select ) {
+    public void addProject( String project, Command details, Command select ) {
         ProjectItemWidget projectItemWidget = itemWidgetsInstances.get();
-        projectItemWidget.init( project, projectCreated, details, select );
+        projectItemWidget.init( project, details, select );
         projectList.appendChild( projectItemWidget.getElement() );
     }
 
