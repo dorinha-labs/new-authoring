@@ -19,8 +19,10 @@ package org.uberfire.ext.aut.client;
 import javax.annotation.PostConstruct;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ui.shared.api.annotations.Bundle;
 
 @EntryPoint
+@Bundle( "resources/i18n/NewAuthoring.properties" )
 public class AutEntryPoint {
 
     @PostConstruct

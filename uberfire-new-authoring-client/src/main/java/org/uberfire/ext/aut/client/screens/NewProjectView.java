@@ -1,10 +1,10 @@
 package org.uberfire.ext.aut.client.screens;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Event;
 import org.jboss.errai.common.client.dom.Button;
 import org.jboss.errai.common.client.dom.Heading;
 import org.jboss.errai.common.client.dom.Input;
+import org.jboss.errai.common.client.dom.Label;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -31,7 +31,7 @@ public class NewProjectView implements NewProjectScreen.View, IsElement {
 
     @Inject
     @DataField
-    private Input groupName;
+    private Input ouName;
 
     @Inject
     @DataField
@@ -41,6 +41,9 @@ public class NewProjectView implements NewProjectScreen.View, IsElement {
     @DataField
     private Button create;
 
+    @Inject
+    @DataField
+    private Label ouLabel;
 
     @Override
     public void init( NewProjectScreen presenter ) {
@@ -68,7 +71,12 @@ public class NewProjectView implements NewProjectScreen.View, IsElement {
 
 
     @Override
-    public void setGroupName( String name ) {
-        groupName.setValue( name );
+    public void setOUName( String name ) {
+        ouName.setValue( name );
+    }
+
+    @Override
+    public void setOUAlias( String ouAlias ) {
+        ouLabel.setTextContent( ouAlias );
     }
 }

@@ -27,6 +27,7 @@ import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UberElement;
+import org.uberfire.ext.aut.api.LibraryInfo;
 import org.uberfire.ext.aut.api.LibraryService;
 import org.uberfire.ext.aut.client.events.NewProjectErrorEvent;
 import org.uberfire.ext.widgets.common.client.breadcrumbs.UberfireBreadcrumbs;
@@ -42,6 +43,12 @@ import javax.inject.Inject;
 
 @WorkbenchScreen( identifier = "NewProjectScreen" )
 public class NewProjectScreen {
+
+    public interface View extends UberElement<NewProjectScreen> {
+        void setOUName( String name );
+
+        void setOUAlias( String ouAlias );
+    }
 
     @Inject
     private PlaceManager placeManager;
@@ -83,18 +90,30 @@ public class NewProjectScreen {
         if ( this.selectOu.isEmpty() ) {
             loadDefaultOU();
         } else {
-            view.setGroupName( selectOu );
+            loadOU( selectOu );
         }
     }
 
-    private void loadDefaultOU() {
-        libraryService.call( new RemoteCallback<OrganizationalUnit>() {
+    private void loadOU( String selectOu ) {
+        libraryService.call( new RemoteCallback<LibraryInfo>() {
             @Override
-            public void callback( OrganizationalUnit o ) {
-                NewProjectScreen.this.selectOu = o.getIdentifier();
-                view.setGroupName( selectOu );
+            public void callback( LibraryInfo lib ) {
+                NewProjectScreen.this.selectOu = lib.getSelectedOrganizationUnit().getIdentifier();
+                view.setOUName( NewProjectScreen.this.selectOu );
+                view.setOUAlias(lib.getOuAlias());
             }
-        } ).getDefaultOrganizationalUnit();
+        } ).getLibraryInfo( selectOu );
+    }
+
+    private void loadDefaultOU() {
+        libraryService.call( new RemoteCallback<LibraryInfo>() {
+            @Override
+            public void callback( LibraryInfo lib ) {
+                NewProjectScreen.this.selectOu = lib.getSelectedOrganizationUnit().getIdentifier();
+                view.setOUName( selectOu );
+                view.setOUAlias(lib.getOuAlias());
+            }
+        } ).getDefaultLibraryInfo();
     }
 
     private void setupBackPlaceRequest( PlaceRequest place ) {
@@ -152,10 +171,6 @@ public class NewProjectScreen {
         socialEvent.fire( new SocialFileSelectedEvent( "NEW_PROJECT", project.getIdentifier() ) );
     }
 
-
-    public interface View extends UberElement<NewProjectScreen> {
-        void setGroupName( String name );
-    }
 
     @PostConstruct
     public void setup() {

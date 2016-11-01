@@ -78,7 +78,8 @@ public class LibraryServiceImpl implements LibraryService {
                 defaultOU,
                 defaultOU,
                 getProjects( defaultOU ),
-                getOrganizationalUnits() );
+                getOrganizationalUnits(),
+                getPreferences().getOuAlias());
 
         return libraryInfo;
     }
@@ -94,7 +95,8 @@ public class LibraryServiceImpl implements LibraryService {
                 defaultOU,
                 selectedOU,
                 getProjects( selectedOU ),
-                organizationalUnits );
+                organizationalUnits,
+                getPreferences().getOuAlias());
 
         return libraryInfo;
 

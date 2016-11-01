@@ -16,8 +16,10 @@
 
 package org.uberfire.ext.aut.client.widgets;
 
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.ext.aut.api.LibraryInfo;
+import org.uberfire.ext.aut.client.resources.i18n.NewAuthoringConstants;
 import org.uberfire.mvp.ParameterizedCommand;
 
 import javax.inject.Inject;
@@ -32,16 +34,20 @@ public class LibraryBreadCrumbToolbarPresenter {
         void clearOrganizationUnits();
 
         void setOrganizationUnitSelected( String identifier );
+
+        void setTeamDropdownLabel( String label );
     }
 
     @Inject
     private View view;
+
 
     private ParameterizedCommand<String> selectCommand;
 
     public void init( ParameterizedCommand<String> selectCommand, LibraryInfo libraryInfo ) {
         this.selectCommand = selectCommand;
         view.init( this );
+        view.setTeamDropdownLabel( libraryInfo.getOuAlias() );
         clearOrganizationUnits();
         libraryInfo.getOrganizationUnits()
                 .forEach( ou -> addOrganizationUnit( ou.getIdentifier() ) );

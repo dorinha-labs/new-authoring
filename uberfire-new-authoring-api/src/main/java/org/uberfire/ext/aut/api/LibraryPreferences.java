@@ -16,12 +16,14 @@
 
 package org.uberfire.ext.aut.api;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
 import org.uberfire.ext.preferences.shared.annotations.Property;
 import org.uberfire.ext.preferences.shared.annotations.WorkbenchPreference;
 import org.uberfire.ext.preferences.shared.bean.BasePreference;
 
 @WorkbenchPreference( identifier = "LibraryPreferences",
         bundleKey = "LibraryPreferences.Label" )
+@Portable
 public class LibraryPreferences implements BasePreference<LibraryPreferences> {
 
     @Property( bundleKey = "LibraryPreferences.OuName" )
@@ -32,6 +34,9 @@ public class LibraryPreferences implements BasePreference<LibraryPreferences> {
 
     @Property( bundleKey = "LibraryPreferences.OUGroupId" )
     String oUGroupId;
+
+    @Property( bundleKey = "LibraryPreferences.OUAlias" )
+    String ouAlias;
 
     @Property( bundleKey = "LibraryPreferences.RepositoryID" )
     String repositoryId;
@@ -52,11 +57,14 @@ public class LibraryPreferences implements BasePreference<LibraryPreferences> {
     String projectDefaultBranch;
 
 
+
+
     @Override
     public LibraryPreferences defaultValue( final LibraryPreferences defaultValue ) {
         defaultValue.ouName = "default-ou";
         defaultValue.oUOwner = "admin";
         defaultValue.oUGroupId = "org.default";
+        defaultValue.ouAlias = "Team";
         defaultValue.repositoryId = "default-repo";
         defaultValue.repositoryDefaultScheme = "git";
         defaultValue.projectGroupId = "org.default";
@@ -100,5 +108,9 @@ public class LibraryPreferences implements BasePreference<LibraryPreferences> {
 
     public String getProjectDefaultBranch() {
         return projectDefaultBranch;
+    }
+
+    public String getOuAlias() {
+        return ouAlias;
     }
 }

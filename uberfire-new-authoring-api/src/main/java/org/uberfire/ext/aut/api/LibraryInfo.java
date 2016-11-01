@@ -14,6 +14,7 @@ public class LibraryInfo {
     private OrganizationalUnit selectedOrganizationUnit;
     private Set<Project> projects = new HashSet<>();
     private Collection<OrganizationalUnit> organizationUnits = new ArrayList<>();
+    private String ouAlias;
 
     public LibraryInfo() {
     }
@@ -21,11 +22,13 @@ public class LibraryInfo {
     public LibraryInfo( OrganizationalUnit defaultOrganizationUnit,
                         OrganizationalUnit selectedOrganizationUnit,
                         Set<Project> projects,
-                        Collection<OrganizationalUnit> organizationUnits ) {
+                        Collection<OrganizationalUnit> organizationUnits,
+                        String ouAlias) {
         this.defaultOrganizationUnit = defaultOrganizationUnit;
         this.selectedOrganizationUnit = selectedOrganizationUnit;
         this.projects = projects;
         this.organizationUnits = organizationUnits;
+        this.ouAlias = ouAlias;
     }
 
     public OrganizationalUnit getDefaultOrganizationUnit() {
@@ -54,5 +57,9 @@ public class LibraryInfo {
 
     public OrganizationalUnit getSelectedOrganizationUnit() {
         return selectedOrganizationUnit;
+    }
+
+    public String getOuAlias() {
+        return ouAlias;
     }
 }

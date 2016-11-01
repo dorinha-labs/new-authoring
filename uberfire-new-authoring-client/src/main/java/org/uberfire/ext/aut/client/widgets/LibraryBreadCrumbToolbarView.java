@@ -1,10 +1,7 @@
 package org.uberfire.ext.aut.client.widgets;
 
 import com.google.inject.Inject;
-import org.jboss.errai.common.client.dom.DOMUtil;
-import org.jboss.errai.common.client.dom.Document;
-import org.jboss.errai.common.client.dom.Option;
-import org.jboss.errai.common.client.dom.Select;
+import org.jboss.errai.common.client.dom.*;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -13,6 +10,11 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 public class LibraryBreadCrumbToolbarView implements LibraryBreadCrumbToolbarPresenter.View, IsElement {
 
     private LibraryBreadCrumbToolbarPresenter presenter;
+
+
+    @DataField
+    @Inject
+    Label teamDropdownLabel;
 
     @DataField
     @Inject
@@ -42,6 +44,11 @@ public class LibraryBreadCrumbToolbarView implements LibraryBreadCrumbToolbarPre
     @Override
     public void setOrganizationUnitSelected( String identifier ) {
         teamDropdown.setValue( identifier );
+    }
+
+    @Override
+    public void setTeamDropdownLabel( String label ) {
+        teamDropdownLabel.setTextContent( label+ ":" );
     }
 
 
