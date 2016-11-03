@@ -16,6 +16,7 @@
 
 package org.uberfire.ext.aut.client.screens;
 
+import org.guvnor.common.services.project.model.POM;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
@@ -31,7 +32,7 @@ public class ProjectsDetailScreen {
 
     public interface View extends UberElement<ProjectsDetailScreen> {
 
-        void update( String projectSelected );
+        void update( String description );
     }
 
     @Inject
@@ -41,10 +42,12 @@ public class ProjectsDetailScreen {
     public void onOpen() {
 
     }
-    //https://bluejeans.com/2934419266/
 
-    public void update( @Observes ProjectDetailEvent event){
-        view.update(event.getProjectSelected());
+    public void update( @Observes ProjectDetailEvent event ) {
+        POM pom = event.getProjectSelected().getPom();
+        if ( pom != null && pom.getDescription() != null ) {
+            view.update( pom.getDescription() );
+        }
     }
 
     @WorkbenchPartTitle

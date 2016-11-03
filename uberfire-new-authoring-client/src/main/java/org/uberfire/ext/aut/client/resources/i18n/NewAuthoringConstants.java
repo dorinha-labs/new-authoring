@@ -34,4 +34,7 @@ public class NewAuthoringConstants {
 
     @TranslationKey( defaultValue = "" )
     public static final String NewProjectScreen_AllProjects = "NewProjectScreen.AllProjects";
+
+    @TranslationKey( defaultValue = "" )
+    public static final String ProjectsDetailsScreen_Title = "ProjectsDetailsScreenTitle";
 }

@@ -1,10 +1,13 @@
 package org.uberfire.ext.aut.client.util;
 
 
+import org.guvnor.common.services.project.model.Project;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.client.workbench.docks.UberfireDock;
 import org.uberfire.client.workbench.docks.UberfireDockPosition;
 import org.uberfire.client.workbench.docks.UberfireDocks;
 import org.uberfire.ext.aut.client.events.ProjectDetailEvent;
+import org.uberfire.ext.aut.client.resources.i18n.NewAuthoringConstants;
 import org.uberfire.mvp.impl.DefaultPlaceRequest;
 
 import javax.annotation.PostConstruct;
@@ -21,41 +24,45 @@ public class ProjectsDocks {
     @Inject
     private Event<ProjectDetailEvent> projectDetailEvent;
 
+    @Inject
+    private TranslationService ts;
+
 
     private UberfireDock uberfireDock;
 
-    private String currentProject;
+    private Project currentProject;
 
     @PostConstruct
     public void setup() {
         uberfireDock = new UberfireDock( UberfireDockPosition.EAST, "INFO_CIRCLE",
                                          new DefaultPlaceRequest( "ProjectsDetailScreen" ),
-                                         "LibraryPerspective" ).withSize( 450 ).withLabel( "View Project" );
+                                         "LibraryPerspective" )
+                .withSize( 450 )
+                .withLabel( ts.getTranslation(
+                        NewAuthoringConstants.ProjectsDetailsScreen_Title ) );
     }
 
     public UberfireDock getUberfireDock() {
         return uberfireDock;
     }
 
-    public void handle( String selectedProject ) {
+    public void handle( Project selectedProject ) {
 
         if ( currentProject == null ) {
-            currentProject = selectedProject;
             uberfireDocks.enable( uberfireDock.getDockPosition(), uberfireDock.getAssociatedPerspective() );
             uberfireDocks.expand( uberfireDock );
-            projectDetailEvent.fire( new ProjectDetailEvent( selectedProject ) );
-
-        } else if ( currentProject == selectedProject ) {
-            uberfireDocks.disable( uberfireDock.getDockPosition(), uberfireDock.getAssociatedPerspective() );
-            currentProject = null;
-        } else {
-            projectDetailEvent.fire( new ProjectDetailEvent( selectedProject ) );
         }
+        this.currentProject = selectedProject;
+        projectDetailEvent.fire( new ProjectDetailEvent( selectedProject ) );
 
     }
 
     public void start() {
         uberfireDocks.add( uberfireDock );
+        uberfireDocks.disable( uberfireDock.getDockPosition(), uberfireDock.getAssociatedPerspective() );
+    }
+
+    public void hide(){
         uberfireDocks.disable( uberfireDock.getDockPosition(), uberfireDock.getAssociatedPerspective() );
     }
 

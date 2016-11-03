@@ -31,9 +31,8 @@ public class ProjectItemWidget implements IsElement {
     @DataField
     Div projectListItemText;
 
-
-    @Inject
-    KebabWidget kebabWidget;
+//    @Inject
+//    KebabWidget kebabWidget;
 
     public void init( String projectName, Command details, Command select ) {
         this.projectName.setTextContent( projectName );
@@ -42,7 +41,7 @@ public class ProjectItemWidget implements IsElement {
             select.execute();
         } );
         projectListItem.setOnclick( e -> details.execute() );
-        kebabWidget.init( details, select );
-        projectListItemKebab.appendChild( kebabWidget.getElement() );
+//        kebabWidget.init( details, select );
+//        projectListItemKebab.appendChild( kebabWidget.getElement() );
     }
 }

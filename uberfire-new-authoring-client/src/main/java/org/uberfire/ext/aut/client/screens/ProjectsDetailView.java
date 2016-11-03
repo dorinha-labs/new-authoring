@@ -16,15 +16,16 @@ public class ProjectsDetailView implements ProjectsDetailScreen.View, IsElement 
 
     @Inject
     @DataField
-    Div temp;
+    Div description;
 
     @Override
     public void init( ProjectsDetailScreen presenter ) {
         this.presenter = presenter;
+
     }
 
     @Override
-    public void update( String projectSelected ) {
-        temp.setTextContent( projectSelected );
+    public void update( String description ) {
+        this.description.setTextContent( description );
     }
 }

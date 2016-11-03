@@ -16,7 +16,6 @@
 
 package org.uberfire.ext.aut.client.screens;
 
-import com.google.gwt.core.client.GWT;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -26,7 +25,6 @@ import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UberElement;
-import org.uberfire.client.workbench.docks.UberfireDocks;
 import org.uberfire.ext.aut.api.LibraryInfo;
 import org.uberfire.ext.aut.api.LibraryService;
 import org.uberfire.ext.aut.client.util.ProjectsDocks;
@@ -66,9 +64,6 @@ public class LibraryScreen {
 
     @Inject
     private Caller<LibraryService> libraryService;
-
-    @Inject
-    private UberfireDocks uberfireDocks;
 
     @Inject
     private ProjectsDocks projectsDocks;
@@ -136,12 +131,14 @@ public class LibraryScreen {
         view.clearProjects();
 
         projects.stream().forEach( p -> view
-                .addProject( p.getProjectName(), detailsCommand( p.getIdentifier() ),
+                .addProject( p.getProjectName(), detailsCommand( p ),
                              selectCommand( p ) ) );
     }
 
 
     public void newProject() {
+        projectsDocks.hide();
+
         Map<String, String> param = new HashMap<>();
         param.put( "backPlace", "LibraryScreen" );
         param.put( "selected_ou", libraryInfo.getSelectedOrganizationUnit().getIdentifier() );
@@ -165,7 +162,7 @@ public class LibraryScreen {
         };
     }
 
-    private Command detailsCommand( String selectedProject ) {
+    private Command detailsCommand( Project selectedProject ) {
         return () -> {
             projectsDocks.handle( selectedProject );
         };

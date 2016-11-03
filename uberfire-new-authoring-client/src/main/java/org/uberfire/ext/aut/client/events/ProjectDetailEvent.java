@@ -15,18 +15,21 @@
  */
 package org.uberfire.ext.aut.client.events;
 
+import org.guvnor.common.services.project.model.Project;
+
 public class ProjectDetailEvent {
 
-    private String projectSelected;
+    private Project projectSelected;
 
     public ProjectDetailEvent() {
+
     }
 
-    public ProjectDetailEvent( String projectSelected ) {
+    public ProjectDetailEvent( Project projectSelected ) {
         this.projectSelected = projectSelected;
     }
 
-    public String getProjectSelected() {
+    public Project getProjectSelected() {
         return projectSelected;
     }
 }

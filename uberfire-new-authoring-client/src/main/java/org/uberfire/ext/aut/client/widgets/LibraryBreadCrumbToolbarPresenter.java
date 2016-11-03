@@ -41,7 +41,6 @@ public class LibraryBreadCrumbToolbarPresenter {
     @Inject
     private View view;
 
-
     private ParameterizedCommand<String> selectCommand;
 
     public void init( ParameterizedCommand<String> selectCommand, LibraryInfo libraryInfo ) {
