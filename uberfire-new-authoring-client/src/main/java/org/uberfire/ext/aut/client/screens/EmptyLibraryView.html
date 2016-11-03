@@ -17,19 +17,22 @@
     <div class="blank-slate-pf">
         <h1 id="welcome">
         </h1>
-        <p> <!--//TODO ederign i18n -->
-            There are currently no projects available for you to view or edit. :)
+        <p data-i18n-key="NoProjects">
         </p>
         <p>
-            To get started, created a <a id="newProjectLink">new project</a> or explore a demo project.
+            <span data-i18n-key="GetStarted">
+            </span>
+            <a data-i18n-key="NewProject" id="newProjectLink"></a>
+            <span data-i18n-key="Explore">
+            </span>
         </p>
         <div class="blank-slate-pf-main-action">
-            <button id="newProject" class="btn btn-primary btn-lg">New Project</button>
+            <button id="newProject" class="btn btn-primary btn-lg" data-i18n-key="NewProjectCaps"></button>
         </div>
-        <div class="blank-slate-pf-secondary-action">
-            <button id="mortageDemo" class="btn btn-default"> Mortgage Demo </button>
-            <button id="hrOnboardingDemo" class="btn btn-default"> HR Onboarding Demo </button>
-            <button id="medicalAppDemo" class="btn btn-default"> Medical App Demo </button>
-        </div>
+        <!--<div class="blank-slate-pf-secondary-action">-->
+            <!--<button id="mortageDemo" class="btn btn-default"> Mortgage Demo</button>-->
+            <!--<button id="hrOnboardingDemo" class="btn btn-default"> HR Onboarding Demo</button>-->
+            <!--<button id="medicalAppDemo" class="btn btn-default"> Medical App Demo</button>-->
+        <!--</div>-->
     </div>
 </div>

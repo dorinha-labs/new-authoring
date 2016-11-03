@@ -16,10 +16,10 @@
 
 package org.uberfire.ext.aut.client.screens;
 
-import org.guvnor.structure.organizationalunit.OrganizationalUnit;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.uberfire.social.activities.model.SocialFileSelectedEvent;
 import org.kie.workbench.common.services.shared.project.KieProject;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
@@ -30,6 +30,7 @@ import org.uberfire.client.mvp.UberElement;
 import org.uberfire.ext.aut.api.LibraryInfo;
 import org.uberfire.ext.aut.api.LibraryService;
 import org.uberfire.ext.aut.client.events.NewProjectErrorEvent;
+import org.uberfire.ext.aut.client.resources.i18n.NewAuthoringConstants;
 import org.uberfire.ext.widgets.common.client.breadcrumbs.UberfireBreadcrumbs;
 import org.uberfire.ext.widgets.common.client.common.BusyIndicatorView;
 import org.uberfire.lifecycle.OnStartup;
@@ -71,6 +72,9 @@ public class NewProjectScreen {
     @Inject
     private View view;
 
+    @Inject
+    private TranslationService ts;
+
     //TODO
     @Inject
     private Event<SocialFileSelectedEvent> socialEvent;
@@ -100,7 +104,7 @@ public class NewProjectScreen {
             public void callback( LibraryInfo lib ) {
                 NewProjectScreen.this.selectOu = lib.getSelectedOrganizationUnit().getIdentifier();
                 view.setOUName( NewProjectScreen.this.selectOu );
-                view.setOUAlias(lib.getOuAlias());
+                view.setOUAlias( lib.getOuAlias() );
             }
         } ).getLibraryInfo( selectOu );
     }
@@ -111,7 +115,7 @@ public class NewProjectScreen {
             public void callback( LibraryInfo lib ) {
                 NewProjectScreen.this.selectOu = lib.getSelectedOrganizationUnit().getIdentifier();
                 view.setOUName( selectOu );
-                view.setOUAlias(lib.getOuAlias());
+                view.setOUAlias( lib.getOuAlias() );
             }
         } ).getDefaultLibraryInfo();
     }
@@ -126,7 +130,7 @@ public class NewProjectScreen {
     }
 
     public void createProject( String projectName ) {
-        busyIndicatorView.showBusyIndicator( "Saving" );
+        busyIndicatorView.showBusyIndicator( ts.getTranslation( NewAuthoringConstants.NewProjectScreen_Saving ) );
 
         libraryService.call( getSuccessCallback(), getErrorCallBack() ).newProject( projectName, selectOu );
     }
@@ -134,8 +138,9 @@ public class NewProjectScreen {
     private ErrorCallback<?> getErrorCallBack() {
         return ( o, throwable ) -> {
             hideLoadingBox();
-            notificationEvent.fire( new NotificationEvent( "Error creating a project.",
-                                                           NotificationEvent.NotificationType.ERROR ) );
+            notificationEvent
+                    .fire( new NotificationEvent( ts.getTranslation( NewAuthoringConstants.NewProjectScreen_Error ),
+                                                  NotificationEvent.NotificationType.ERROR ) );
             return false;
         };
     }
@@ -155,7 +160,8 @@ public class NewProjectScreen {
 
     private void setupBreadCrumbs( KieProject project ) {
         breadcrumbs.clearBreadCrumbs( "AuthoringPerspective" );
-        breadcrumbs.addBreadCrumb( "AuthoringPerspective", "All Projects",
+        breadcrumbs.addBreadCrumb( "AuthoringPerspective",
+                                   ts.getTranslation( NewAuthoringConstants.NewProjectScreen_AllProjects ),
                                    new DefaultPlaceRequest( "LibraryPerspective" ) );
         breadcrumbs
                 .addBreadCrumb( "AuthoringPerspective", project.getProjectName(),

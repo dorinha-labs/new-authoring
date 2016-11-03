@@ -5,10 +5,12 @@ import com.google.inject.Inject;
 import org.jboss.errai.common.client.dom.*;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.jboss.errai.ui.client.local.api.IsElement;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.SinkNative;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.uberfire.ext.aut.client.resources.i18n.NewAuthoringConstants;
 import org.uberfire.ext.aut.client.widgets.ProjectItemWidget;
 import org.uberfire.mvp.Command;
 
@@ -35,9 +37,13 @@ public class LibraryView implements LibraryScreen.View, IsElement {
     @Inject
     ManagedInstance<ProjectItemWidget> itemWidgetsInstances;
 
+    @Inject
+    TranslationService ts;
+
     @Override
     public void init( LibraryScreen presenter ) {
         this.presenter = presenter;
+        filterText.setAttribute( "placeholder", ts.getTranslation( NewAuthoringConstants.LibraryView_Filter ) );
     }
 
     @Override

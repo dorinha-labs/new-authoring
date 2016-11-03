@@ -21,35 +21,17 @@ import org.jboss.errai.ui.shared.api.annotations.TranslationKey;
 public class NewAuthoringConstants {
 
     @TranslationKey( defaultValue = "" )
-    public static final String LibraryPreferences_Label = "LibraryPreferences.Label";
+    public static final String EmptyLibraryView_Welcome = "EmptyLibraryView.Welcome";
 
     @TranslationKey( defaultValue = "" )
-    public static final String LibraryPreferences_OU_Name = "LibraryPreferences.OuName";
+    public static final String LibraryView_Filter = "LibraryView.Filter";
 
     @TranslationKey( defaultValue = "" )
-    public static final String LibraryPreferences_OU_Owner = "LibraryPreferences.OuOwner";
+    public static final String NewProjectScreen_Saving = "NewProjectScreen.Saving";
 
     @TranslationKey( defaultValue = "" )
-    public static final String LibraryPreferences_OU_Group_ID = "LibraryPreferences.OUGroupId";
+    public static final String NewProjectScreen_Error = "NewProjectScreen.Error";
 
     @TranslationKey( defaultValue = "" )
-    public static final String LibraryPreferences_OU_Alias = "LibraryPreferences.OUAlias";
-
-    @TranslationKey( defaultValue = "" )
-    public static final String LibraryPreferences_Repository_ID = "LibraryPreferences.RepositoryID";
-
-    @TranslationKey( defaultValue = "" )
-    public static final String LibraryPreferences_Repository_Default_Scheme = "LibraryPreferences.RepositoryDefaultScheme";
-
-    @TranslationKey( defaultValue = "" )
-    public static final String LibraryPreferences_Project_Group_ID = "LibraryPreferences.ProjectGroupId";
-
-    @TranslationKey( defaultValue = "" )
-    public static final String LibraryPreferences_Project_Version = "LibraryPreferences.ProjectVersion";
-
-    @TranslationKey( defaultValue = "" )
-    public static final String LibraryPreferences_Project_Description = "LibraryPreferences.ProjectDescription";
-
-    @TranslationKey( defaultValue = "" )
-    public static final String LibraryPreferences_Project_Default_Branch = "LibraryPreferences.ProjectDefaultBranch";
+    public static final String NewProjectScreen_AllProjects = "NewProjectScreen.AllProjects";
 }

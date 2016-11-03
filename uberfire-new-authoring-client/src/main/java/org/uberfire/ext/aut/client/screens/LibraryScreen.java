@@ -160,15 +160,13 @@ public class LibraryScreen {
                                     new DefaultPlaceRequest( "AuthoringPerspective" ) );
 
             placeManager.goTo( new DefaultPlaceRequest( "AuthoringPerspective" ) );
-            //check permissions like DefaultSocialLinkCommandGenerator.java
+            //TODO check permissions like DefaultSocialLinkCommandGenerator.java
             socialEvent.fire( new SocialFileSelectedEvent( "NEW_PROJECT", project.getIdentifier() ) );
         };
     }
 
     private Command detailsCommand( String selectedProject ) {
         return () -> {
-            //TODO Open Details Screen
-            GWT.log( "details" );
             projectsDocks.handle( selectedProject );
         };
     }
