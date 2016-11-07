@@ -29,6 +29,10 @@ public class LibraryView implements LibraryScreen.View, IsElement {
 
     @DataField
     @Inject
+    Button importExample;
+
+    @DataField
+    @Inject
     Input filterText;
 
     @Inject
@@ -64,16 +68,22 @@ public class LibraryView implements LibraryScreen.View, IsElement {
     }
 
 
-    @SinkNative( com.google.gwt.user.client.Event.ONCLICK )
+    @SinkNative( Event.ONCLICK )
     @EventHandler( "newProjectButton" )
-    public void newProject( com.google.gwt.user.client.Event e ) {
+    public void newProject( Event e ) {
 
         presenter.newProject();
     }
 
+    @SinkNative( Event.ONCLICK )
+    @EventHandler( "importExample" )
+    public void importExample( Event e ) {
+        presenter.importExample();
+    }
+
     @SinkNative( Event.ONKEYUP )
     @EventHandler( "filterText" )
-    public void filterTextChange( com.google.gwt.user.client.Event e ) {
+    public void filterTextChange( Event e ) {
         presenter.filterProjects( filterText.getValue() );
     }
 

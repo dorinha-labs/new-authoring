@@ -18,15 +18,20 @@ package org.uberfire.ext.aut.api;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
-public class LibrarySelectedEvent {
+public class LibraryContextSwitchEvent {
 
     private String uri;
 
     private EventType eventType;
 
-    public LibrarySelectedEvent(){}
+    public LibraryContextSwitchEvent() {
+    }
 
-    public LibrarySelectedEvent( EventType eventType, String uri){
+    public LibraryContextSwitchEvent( EventType eventType ) {
+        this.eventType = eventType;
+    }
+
+    public LibraryContextSwitchEvent( EventType eventType, String uri ) {
         this.eventType = eventType;
         this.uri = uri;
     }
@@ -39,8 +44,16 @@ public class LibrarySelectedEvent {
         return eventType;
     }
 
+    public boolean isProjectFromExample() {
+        return eventType == EventType.PROJECT_FROM_EXAMPLE;
+    }
+
+    public boolean isProjectSelected() {
+        return eventType == EventType.PROJECT_SELECTED;
+    }
+
     @Portable
-    public enum EventType{
-        PROJECT_SELECTED, NEW_PROJECT;
+    public enum EventType {
+        PROJECT_SELECTED, PROJECT_FROM_EXAMPLE;
     }
 }

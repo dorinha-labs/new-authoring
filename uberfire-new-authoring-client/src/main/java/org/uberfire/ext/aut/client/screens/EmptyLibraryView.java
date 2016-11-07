@@ -24,17 +24,9 @@ public class EmptyLibraryView implements EmptyLibraryScreen.View, IsElement {
     @DataField
     private Button newProject;
 
-//    @Inject
-//    @DataField
-//    private Button mortageDemo;
-//
-//    @Inject
-//    @DataField
-//    private Button hrOnboardingDemo;
-//
-//    @Inject
-//    @DataField
-//    private Button medicalAppDemo;
+    @Inject
+    @DataField
+    private Button example;
 
     @Named( "h1" )
     @Inject
@@ -65,26 +57,15 @@ public class EmptyLibraryView implements EmptyLibraryScreen.View, IsElement {
         presenter.newProject();
     }
 
-//    @SinkNative( Event.ONCLICK )
-//    @EventHandler( "mortageDemo" )
-//    public void mortageDemo( Event e ) {
-//        presenter.runDemo( "mortageDemo" );
-//    }
-//
-//    @SinkNative( Event.ONCLICK )
-//    @EventHandler( "hrOnboardingDemo" )
-//    public void hrOnboardingDemo( Event e ) {
-//        presenter.runDemo( "hrOnboardingDemo" );
-//    }
-//
-//    @SinkNative( Event.ONCLICK )
-//    @EventHandler( "medicalAppDemo" )
-//    public void medicalAppDemo( Event e ) {
-//        presenter.runDemo( "medicalAppDemo" );
-//    }
+    @SinkNative( Event.ONCLICK )
+    @EventHandler( "example" )
+    public void example( Event e ) {
+        presenter.importExample(  );
+    }
 
     @Override
     public void setup( String username ) {
-        welcome.setInnerHTML( ts.getTranslation( NewAuthoringConstants.EmptyLibraryView_Welcome ) + " " +  username + "." );
+        welcome.setInnerHTML(
+                ts.getTranslation( NewAuthoringConstants.EmptyLibraryView_Welcome ) + " " + username + "." );
     }
 }

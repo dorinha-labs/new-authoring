@@ -27,7 +27,7 @@ import org.uberfire.client.annotations.WorkbenchScreen;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.ext.aut.api.LibraryInfo;
-import org.uberfire.ext.aut.api.LibrarySelectedEvent;
+import org.uberfire.ext.aut.api.LibraryContextSwitchEvent;
 import org.uberfire.ext.aut.api.LibraryService;
 import org.uberfire.ext.aut.client.events.NewProjectErrorEvent;
 import org.uberfire.ext.aut.client.resources.i18n.NewAuthoringConstants;
@@ -80,7 +80,7 @@ public class NewProjectScreen {
     private TranslationService ts;
 
     @Inject
-    private Event<LibrarySelectedEvent> librarySelectedEvent;
+    private Event<LibraryContextSwitchEvent> libraryContextSwitchEvent;
 
     @Inject
     private AuthorizationManager authorizationManager;
@@ -194,8 +194,8 @@ public class NewProjectScreen {
 
     private void openProject( KieProject project ) {
         placeManager.goTo( "AuthoringPerspective" );
-        librarySelectedEvent.fire( new LibrarySelectedEvent( LibrarySelectedEvent.EventType.PROJECT_SELECTED,
-                                                             project.getIdentifier() ) );
+        libraryContextSwitchEvent.fire( new LibraryContextSwitchEvent( LibraryContextSwitchEvent.EventType.PROJECT_SELECTED,
+                                                                       project.getIdentifier() ) );
     }
 
 

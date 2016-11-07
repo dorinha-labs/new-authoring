@@ -25,7 +25,7 @@ import org.uberfire.client.annotations.WorkbenchScreen;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.ext.aut.api.LibraryInfo;
-import org.uberfire.ext.aut.api.LibrarySelectedEvent;
+import org.uberfire.ext.aut.api.LibraryContextSwitchEvent;
 import org.uberfire.ext.aut.api.LibraryService;
 import org.uberfire.ext.aut.client.util.ProjectsDocks;
 import org.uberfire.ext.aut.client.widgets.LibraryBreadCrumbToolbarPresenter;
@@ -79,7 +79,7 @@ public class LibraryScreen {
     private UberfireBreadcrumbs breadcrumbs;
 
     @Inject
-    private Event<LibrarySelectedEvent> librarySelectedEvent;
+    private Event<LibraryContextSwitchEvent> libraryContextSwitchEvent;
 
     @Inject
     private SessionInfo sessionInfo;
@@ -95,7 +95,7 @@ public class LibraryScreen {
     private void setupToolBar() {
         breadcrumbs.clearBreadCrumbs( "LibraryPerspective" );
         breadcrumbs.addBreadCrumb( "LibraryPerspective", "All Projects",
-                                   new DefaultPlaceRequest( "LibraryPerspective" ) );
+                                   new DefaultPlaceRequest( "LibraryScreen" ) );
         breadcrumbs.addToolbar( "LibraryPerspective", breadCrumbToolbarPresenter.getView().getElement() );
     }
 
@@ -147,7 +147,6 @@ public class LibraryScreen {
                              selectCommand( p ) ) );
     }
 
-
     public void newProject() {
         projectsDocks.hide();
 
@@ -157,6 +156,7 @@ public class LibraryScreen {
 
         placeManager.goTo( new DefaultPlaceRequest( "NewProjectScreen", param ) );
     }
+
 
     private Command selectCommand( Project project ) {
         return () -> {
@@ -171,8 +171,8 @@ public class LibraryScreen {
                                         new DefaultPlaceRequest( "AuthoringPerspective" ) );
 
                 placeManager.goTo( new DefaultPlaceRequest( "AuthoringPerspective" ) );
-                librarySelectedEvent.fire( new LibrarySelectedEvent( LibrarySelectedEvent.EventType.PROJECT_SELECTED,
-                                                                     project.getIdentifier() ) );
+                libraryContextSwitchEvent.fire( new LibraryContextSwitchEvent( LibraryContextSwitchEvent.EventType.PROJECT_SELECTED,
+                                                                               project.getIdentifier() ) );
             }
             else{
                 //TODO no rights popup?
@@ -203,6 +203,20 @@ public class LibraryScreen {
                     .collect( Collectors.toSet() );
 
             setupProjects( filteredProjects );
+        }
+    }
+
+    public void importExample() {
+        if ( hasAccessToPerspective( "AuthoringPerspective" ) ) {
+
+            breadcrumbs.clearBreadCrumbs( "AuthoringPerspective" );
+            breadcrumbs.addBreadCrumb( "AuthoringPerspective", "All Projects",
+                                       new DefaultPlaceRequest( "LibraryPerspective" ) );
+
+            
+            placeManager.goTo( new DefaultPlaceRequest( "AuthoringPerspective" ) );
+            libraryContextSwitchEvent
+                    .fire( new LibraryContextSwitchEvent( LibraryContextSwitchEvent.EventType.PROJECT_FROM_EXAMPLE ) );
         }
     }
 

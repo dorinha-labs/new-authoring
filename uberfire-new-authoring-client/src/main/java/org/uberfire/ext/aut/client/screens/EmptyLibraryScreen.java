@@ -16,16 +16,21 @@
 
 package org.uberfire.ext.aut.client.screens;
 
-import com.google.gwt.core.client.GWT;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UberElement;
+import org.uberfire.ext.aut.api.LibraryContextSwitchEvent;
 import org.uberfire.mvp.impl.DefaultPlaceRequest;
+import org.uberfire.rpc.SessionInfo;
+import org.uberfire.security.ResourceRef;
+import org.uberfire.security.authz.AuthorizationManager;
+import org.uberfire.workbench.model.ActivityResourceType;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 @WorkbenchScreen( identifier = "EmptyLibraryScreen" )
@@ -47,19 +52,40 @@ public class EmptyLibraryScreen {
     @Inject
     private PlaceManager placeManager;
 
+    @Inject
+    private Event<LibraryContextSwitchEvent> libraryContextSwitchEvent;
+
+    @Inject
+    private AuthorizationManager authorizationManager;
+
+    @Inject
+    private SessionInfo sessionInfo;
+
+
     @PostConstruct
     public void setup() {
         view.init( this );
         view.setup( user.getIdentifier() );
     }
 
-
     public void newProject() {
         placeManager.goTo( new DefaultPlaceRequest( "NewProjectScreen" ) );
     }
 
-    public void runDemo( String demoID ) {
 
+    public void importExample() {
+        //TODO PerspectiveIds.Authoring
+        if ( hasAccessToPerspective( "AuthoringPerspective" ) ) {
+
+            placeManager.goTo( new DefaultPlaceRequest( "AuthoringPerspective" ) );
+            libraryContextSwitchEvent
+                    .fire( new LibraryContextSwitchEvent( LibraryContextSwitchEvent.EventType.PROJECT_FROM_EXAMPLE ) );
+        }
+    }
+
+    boolean hasAccessToPerspective( String perspectiveId ) {
+        ResourceRef resourceRef = new ResourceRef( perspectiveId, ActivityResourceType.PERSPECTIVE );
+        return authorizationManager.authorize( resourceRef, sessionInfo.getIdentity() );
     }
 
     @WorkbenchPartTitle
