@@ -30,6 +30,8 @@ import javax.inject.Inject;
 @WorkbenchScreen( identifier = "ProjectsDetailScreen" )
 public class ProjectsDetailScreen {
 
+    private POM pom;
+
     public interface View extends UberElement<ProjectsDetailScreen> {
 
         void update( String description );
@@ -44,7 +46,7 @@ public class ProjectsDetailScreen {
     }
 
     public void update( @Observes ProjectDetailEvent event ) {
-        POM pom = event.getProjectSelected().getPom();
+        pom = event.getProjectSelected().getPom();
         if ( pom != null && pom.getDescription() != null ) {
             view.update( pom.getDescription() );
         }

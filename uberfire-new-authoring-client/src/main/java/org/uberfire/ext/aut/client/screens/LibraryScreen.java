@@ -213,7 +213,7 @@ public class LibraryScreen {
             breadcrumbs.addBreadCrumb( "AuthoringPerspective", "All Projects",
                                        new DefaultPlaceRequest( "LibraryPerspective" ) );
 
-            
+
             placeManager.goTo( new DefaultPlaceRequest( "AuthoringPerspective" ) );
             libraryContextSwitchEvent
                     .fire( new LibraryContextSwitchEvent( LibraryContextSwitchEvent.EventType.PROJECT_FROM_EXAMPLE ) );
