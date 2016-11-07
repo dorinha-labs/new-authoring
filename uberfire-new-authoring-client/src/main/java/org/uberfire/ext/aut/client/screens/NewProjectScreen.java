@@ -20,7 +20,6 @@ import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.ErrorCallback;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
-import org.kie.uberfire.social.activities.model.SocialFileSelectedEvent;
 import org.kie.workbench.common.services.shared.project.KieProject;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
@@ -28,6 +27,7 @@ import org.uberfire.client.annotations.WorkbenchScreen;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.ext.aut.api.LibraryInfo;
+import org.uberfire.ext.aut.api.LibrarySelectedEvent;
 import org.uberfire.ext.aut.api.LibraryService;
 import org.uberfire.ext.aut.client.events.NewProjectErrorEvent;
 import org.uberfire.ext.aut.client.resources.i18n.NewAuthoringConstants;
@@ -36,7 +36,11 @@ import org.uberfire.ext.widgets.common.client.common.BusyIndicatorView;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.PlaceRequest;
 import org.uberfire.mvp.impl.DefaultPlaceRequest;
+import org.uberfire.rpc.SessionInfo;
+import org.uberfire.security.ResourceRef;
+import org.uberfire.security.authz.AuthorizationManager;
 import org.uberfire.workbench.events.NotificationEvent;
+import org.uberfire.workbench.model.ActivityResourceType;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
@@ -75,9 +79,14 @@ public class NewProjectScreen {
     @Inject
     private TranslationService ts;
 
-    //TODO
     @Inject
-    private Event<SocialFileSelectedEvent> socialEvent;
+    private Event<LibrarySelectedEvent> librarySelectedEvent;
+
+    @Inject
+    private AuthorizationManager authorizationManager;
+
+    @Inject
+    private SessionInfo sessionInfo;
 
     private DefaultPlaceRequest backPlaceRequest;
 
@@ -153,9 +162,20 @@ public class NewProjectScreen {
         return project -> {
             hideLoadingBox();
             notifySuccess();
-            setupBreadCrumbs( project );
-            openProject( project );
+            //TODO PerspectiveIds.Authoring
+            if ( hasAccessToPerspective( "AuthoringPerspective" ) ) {
+                setupBreadCrumbs( project );
+                openProject( project );
+            }
+            else{
+                //TODO no rights popup? DefaultSocialLinkCommandGenerator
+            }
         };
+    }
+
+    boolean hasAccessToPerspective( String perspectiveId ) {
+        ResourceRef resourceRef = new ResourceRef( perspectiveId, ActivityResourceType.PERSPECTIVE );
+        return authorizationManager.authorize( resourceRef, sessionInfo.getIdentity() );
     }
 
     private void setupBreadCrumbs( KieProject project ) {
@@ -174,7 +194,8 @@ public class NewProjectScreen {
 
     private void openProject( KieProject project ) {
         placeManager.goTo( "AuthoringPerspective" );
-        socialEvent.fire( new SocialFileSelectedEvent( "NEW_PROJECT", project.getIdentifier() ) );
+        librarySelectedEvent.fire( new LibrarySelectedEvent( LibrarySelectedEvent.EventType.PROJECT_SELECTED,
+                                                             project.getIdentifier() ) );
     }
 
 

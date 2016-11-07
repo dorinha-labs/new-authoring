@@ -19,13 +19,13 @@ package org.uberfire.ext.aut.client.screens;
 import org.guvnor.common.services.project.model.Project;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.kie.uberfire.social.activities.model.SocialFileSelectedEvent;
 import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.annotations.WorkbenchScreen;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UberElement;
 import org.uberfire.ext.aut.api.LibraryInfo;
+import org.uberfire.ext.aut.api.LibrarySelectedEvent;
 import org.uberfire.ext.aut.api.LibraryService;
 import org.uberfire.ext.aut.client.util.ProjectsDocks;
 import org.uberfire.ext.aut.client.widgets.LibraryBreadCrumbToolbarPresenter;
@@ -33,6 +33,10 @@ import org.uberfire.ext.widgets.common.client.breadcrumbs.UberfireBreadcrumbs;
 import org.uberfire.lifecycle.OnOpen;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.impl.DefaultPlaceRequest;
+import org.uberfire.rpc.SessionInfo;
+import org.uberfire.security.ResourceRef;
+import org.uberfire.security.authz.AuthorizationManager;
+import org.uberfire.workbench.model.ActivityResourceType;
 
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -75,7 +79,13 @@ public class LibraryScreen {
     private UberfireBreadcrumbs breadcrumbs;
 
     @Inject
-    private Event<SocialFileSelectedEvent> socialEvent;
+    private Event<LibrarySelectedEvent> librarySelectedEvent;
+
+    @Inject
+    private SessionInfo sessionInfo;
+
+    @Inject
+    private AuthorizationManager authorizationManager;
 
     @OnOpen
     public void onOpen() {
@@ -84,6 +94,8 @@ public class LibraryScreen {
 
     private void setupToolBar() {
         breadcrumbs.clearBreadCrumbs( "LibraryPerspective" );
+        breadcrumbs.addBreadCrumb( "LibraryPerspective", "All Projects",
+                                   new DefaultPlaceRequest( "LibraryPerspective" ) );
         breadcrumbs.addToolbar( "LibraryPerspective", breadCrumbToolbarPresenter.getView().getElement() );
     }
 
@@ -148,18 +160,29 @@ public class LibraryScreen {
 
     private Command selectCommand( Project project ) {
         return () -> {
+            if ( hasAccessToPerspective( "AuthoringPerspective" ) ) {
 
-            breadcrumbs.clearBreadCrumbs( "AuthoringPerspective" );
-            breadcrumbs.addBreadCrumb( "AuthoringPerspective", "All Projects",
-                                       new DefaultPlaceRequest( "LibraryPerspective" ) );
-            breadcrumbs
-                    .addBreadCrumb( "AuthoringPerspective", project.getProjectName(),
-                                    new DefaultPlaceRequest( "AuthoringPerspective" ) );
 
-            placeManager.goTo( new DefaultPlaceRequest( "AuthoringPerspective" ) );
-            //TODO check permissions like DefaultSocialLinkCommandGenerator.java
-            socialEvent.fire( new SocialFileSelectedEvent( "NEW_PROJECT", project.getIdentifier() ) );
+                breadcrumbs.clearBreadCrumbs( "AuthoringPerspective" );
+                breadcrumbs.addBreadCrumb( "AuthoringPerspective", "All Projects",
+                                           new DefaultPlaceRequest( "LibraryPerspective" ) );
+                breadcrumbs
+                        .addBreadCrumb( "AuthoringPerspective", project.getProjectName(),
+                                        new DefaultPlaceRequest( "AuthoringPerspective" ) );
+
+                placeManager.goTo( new DefaultPlaceRequest( "AuthoringPerspective" ) );
+                librarySelectedEvent.fire( new LibrarySelectedEvent( LibrarySelectedEvent.EventType.PROJECT_SELECTED,
+                                                                     project.getIdentifier() ) );
+            }
+            else{
+                //TODO no rights popup?
+            }
         };
+    }
+
+    boolean hasAccessToPerspective( String perspectiveId ) {
+        ResourceRef resourceRef = new ResourceRef( perspectiveId, ActivityResourceType.PERSPECTIVE );
+        return authorizationManager.authorize( resourceRef, sessionInfo.getIdentity() );
     }
 
     private Command detailsCommand( Project selectedProject ) {

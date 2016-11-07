@@ -24,6 +24,7 @@ import org.uberfire.client.annotations.WorkbenchPerspective;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.workbench.docks.UberfireDocks;
 import org.uberfire.ext.aut.client.util.ProjectsDocks;
+import org.uberfire.ext.widgets.common.client.breadcrumbs.UberfireBreadcrumbs;
 import org.uberfire.lifecycle.OnOpen;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.PlaceRequest;
@@ -49,6 +50,7 @@ public class LibraryPerspective extends Composite {
 
     @Inject
     private ProjectsDocks projectsDocks;
+
 
     @AfterInitialization
     public void setupDocks() {
